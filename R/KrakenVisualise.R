@@ -45,7 +45,7 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
     ggplot2::scale_shape_manual(values = c("General Sample" = 21, "Infinite" = 24, "Sample of Interest" = 17)) +
     #ggplot2::scale_alpha_manual(values = c(FALSE=0.7, TRUE=1)) +
     ggplot2::scale_size_manual(values = pointsize) +
-    #utilitybeltgg::theme_fivethirtyeight_two() +
+    utilitybeltgg::theme_fivethirtyeight_two() +
     ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.title.y  = ggplot2::element_blank()) +
     utilitybeltgg::theme_legend_right() +
     ggplot2::scale_color_manual(values = c("FALSE" = "red", "TRUE" = "blue"))
@@ -104,7 +104,7 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
     ggplot2::ggtitle(paste0(samples_of_interest, collapse = ",")) +
     ggplot2::guides(shape=ggplot2::guide_legend("Infinite")) +
     ggplot2::geom_point() +
-    #ggthemes::theme_fivethirtyeight() +
+    ggthemes::theme_fivethirtyeight() +
     #ggthemes::theme_calc() +
     utilitybeltgg::theme_common_adjustments() +
     #utilitybeltgg::theme_fivethirtyeight_two() +
