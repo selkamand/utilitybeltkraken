@@ -90,19 +90,24 @@ kraken_reports_parse <- function(kraken2directory){
   kraken_reports_df[, `:=` (RankSimple = stringr::str_replace_all(string =  Rank, pattern = "[0-9]", replacement = ""))]
   #kraken_df$RankSimple <- gsub(x = kraken_df$Rank, pattern = "[0-9]", replacement = "")
 
-  # Recalculate Percent Reads Covered as normalised score. Due to no. of sci figures supported by kraken2 - clades with 100,000 reads classifed will still come out as '0%'. We fix this below
-  total_reads = sum(kraken_reports_df$ReadsDirectlyAssigned)
-  kraken_reports_df[, `:=`(PercentReadsCoveredByClade = ReadsCoveredByClade*100/total_reads) ]
-
-  # total_reads = sum(kraken_df$ReadsDirectlyAssigned)
-  # kraken_df$PercentReadsCoveredByClade <- kraken_df$ReadsCoveredByClade*100/total_reads
-
-  # Calculate RPM (reads covered by clade per million total reads
-  kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade*1e6/total_reads)]
-  #kraken_df$RPM <- kraken_df$ReadsCoveredByClade*1e6/total_reads
-
   #Add SampleID column derived from report filename
   kraken_reports_df[, `:=`(SampleID = stringr::str_replace(string = Filename, pattern = '\\..*', replacement = ""))]
+
+  # Recalculate Percent Reads Covered as normalised score. Due to no. of sci figures supported by kraken2 - clades with 100,000 reads classifed will still come out as '0%'. We fix this below
+  #total_reads = sum(kraken_reports_df$ReadsDirectlyAssigned)
+  #kraken_reports_df[, `:=`(PercentReadsCoveredByClade = ReadsCoveredByClade*100/total_reads) ]
+
+  #kraken_reports_df
+  # total_reads = sum(kraken_df$ReadsDirectlyAssigned)
+  # kraken_df$PercentReadsCoveredByClade <- kraken_df$ReadsCoveredByClade*100/total_reads
+  #browser()
+  # Calculate RPM (reads covered by clade per million total reads
+  kraken_reports_df[, `:=`(total_reads_in_sample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
+  #kraken_reports_df[, `:=`(total_reads_in_sample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
+  kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade * 1e+06/total_reads_in_sample)]
+  #kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade*1e6/total_reads)]
+  #kraken_df$RPM <- kraken_df$ReadsCoveredByClade*1e6/total_reads
+
   #kraken_df$SampleID = sub(x=basename(kraken2report), pattern = '\\..*', replacement = "")
   return(kraken_reports_df)
 
