@@ -42,13 +42,13 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
     ggplot2::scale_x_continuous(oob = scales::oob_squish_infinite, trans="log10") +
     ggplot2::facet_wrap(~ScientificName, ncol = 1, scales = "free_y") +
     #ggplot2::theme(strip.text.x = ggplot2::element_blank()) +
-    ggplot2::scale_shape_manual(values = c(21,24, 17)) +
+    ggplot2::scale_shape_manual(values = c("General Sample" = 21, "Infinite" = 24, "Sample of Interest" = 17)) +
     #ggplot2::scale_alpha_manual(values = c(FALSE=0.7, TRUE=1)) +
     ggplot2::scale_size_manual(values = pointsize) +
     #utilitybeltgg::theme_fivethirtyeight_two() +
     ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.title.y  = ggplot2::element_blank()) +
     utilitybeltgg::theme_legend_right() +
-    ggplot2::scale_color_manual(values = c("red", "blue"))
+    ggplot2::scale_color_manual(values = c("FALSE" = "red", "TRUE" = "blue"))
 
   if(show_sample_vlines){
     plot = plot + ggplot2::geom_vline(data = function(df) {df[SampleID %in% sample_of_interest,]} ,ggplot2::aes_string(xintercept = metric, linetype = "SampleID"))
@@ -98,7 +98,7 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
         shape = is.infinite(ZscoreRobust)
         #color = TaxonomyID %in% taxonomy_id_to_highlight,
         )) +
-    ggplot2::scale_shape_manual(values = c(21,24)) +
+    ggplot2::scale_shape_manual(values = c("FALSE" = 21,"TRUE" = 24)) +
     ggplot2::scale_x_continuous(trans = "log10", oob = scales::oob_squish_infinite) +
     ggplot2::scale_y_continuous(trans = "log10", oob = scales::oob_squish_infinite) +
     ggplot2::ggtitle(paste0(samples_of_interest, collapse = ",")) +
