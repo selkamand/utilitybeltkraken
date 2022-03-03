@@ -2,18 +2,20 @@
 #' Visualise Distribution
 #'
 #' @inheritParams kraken_report_add_zscore
-#' @param taxids_of_interest
+#' @param taxids_of_interest taxonomy ids to show as distinct facets
 #'
-#' @return
+#' @return ggplot
 #' @export
 #'
-kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_interest, metric = "ZscoreRobust" ,show_sample_vlines = FALSE, supporting_reads_threshold = 50, sample_of_interest = NA, use_loggable_version = TRUE, seed = 1, pointsize = c(1, 2), ...){
+kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_interest, y_aesthetic = "ScientificName", metric = "ZscoreRobust", show_y_axis_labels = FALSE,show_sample_vlines = FALSE, supporting_reads_threshold = 50, sample_of_interest = NA, use_loggable_version = TRUE, seed = 1, pointsize = c(1, 2), ...){
+
 
   # Defensive Assertions
   standardised_metrics = c("Zscore", "ZscoreRobust", "MedianIQR", "MedianQn", "MedianTau2")
   assertthat::assert_that(assertthat::is.string(metric))
   assertthat::assert_that(metric %in% standardised_metrics, msg = paste0("metric (", metric,") must be one of: [", paste0(standardised_metrics, collapse = ", "), "]"))
   assertthat::assert_that(is.data.frame(kraken_report_df))
+  assertthat::assert_that(y_aesthetic %in% colnames(kraken_report_df))
   if(use_loggable_version) metric <- paste0(metric, "Loggable")
   assertthat::assert_that(metric %in% colnames(kraken_report_df), msg = paste0("kraken_report_df must contain the column: [", metric, "]. Please see ?kraken_info_standardised_metrics for information on how to add standard metrics to your dataframe."))
   columns = c("SampleID", "TaxonomyID", "ScientificName", "ReadsCoveredByClade", "RPM", metric, "ZscoreRobust")
@@ -21,9 +23,12 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
   assertthat::assert_that(length(pointsize) == 2, msg = "pointsize must a vector of length 2. First number is size of most samples and second number for size of 'samples of interest' ")
   #assertthat::assert_that(color_aesthetic %in% colnames(kraken_report_df), msg = paste0("kraken_report_df must contain the column [", paste0(color_aesthetic, collapse=", "), "], to use it as a color aesthetic"))
 
+  # Warning messages
+  if(y_aesthetic != "ScientificName"){ message("You've chosen to set a Y aesthetic - you will probably want to also set show_y_axis_labels = TRUE ")}
+
 
   # Subset the data
-  subset_df = kraken_report_df[, (columns), with=FALSE][TaxonomyID %in% taxids_of_interest][, `:=` (Infinite = is.infinite(get(metric)))]
+  subset_df = kraken_report_df[TaxonomyID %in% taxids_of_interest][, `:=` (Infinite = is.infinite(get(metric)))]
   subset_df = subset_df[, `:=`(SampleOfInterest = SampleID %in% sample_of_interest)]
   subset_df = subset_df[, `:=` (Shape = data.table::fcase(SampleOfInterest, "Sample of Interest", is.infinite(get(metric)), "Infinite", default = "General Sample"))]
 
@@ -32,12 +37,11 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
   set.seed(seed)
 
   # d = subset_df[SampleID == sample_of_interest,]
-
   pos_jitter = ggplot2::position_jitter(width = 0, height = 0.5, seed = seed)
-#browser()
+
   plot = subset_df %>%
-    ggplot2::ggplot(ggplot2::aes_string(x = metric, y= "ScientificName", SampleID = "SampleID", ReadsCoveredByClade = "ReadsCoveredByClade", RPM = "RPM", Metric = metric, ZscoreRobust = "ZscoreRobust", customdata = "SampleID", ...), alpha = 0.5) +
-    ggplot2::geom_jitter(position = pos_jitter, ggplot2::aes(shape = Shape, color =  ReadsCoveredByClade > 50, size = SampleOfInterest)) +
+    ggplot2::ggplot(ggplot2::aes_string(x = metric, y= y_aesthetic, SampleID = "SampleID", ReadsCoveredByClade = "ReadsCoveredByClade", RPM = "RPM", Metric = metric, ZscoreRobust = "ZscoreRobust", customdata = "SampleID", ...), alpha = 0.5) +
+    ggplot2::geom_jitter(position = pos_jitter, ggplot2::aes(shape = Shape, color =  ReadsCoveredByClade > supporting_reads_threshold, size = SampleOfInterest)) +
     #ggplot2::geom_jitter(position = pos_jitter, ggplot2::aes(shape = Infinite, color =  ReadsCoveredByClade > 50), stroke = 2) +
     ggplot2::scale_x_continuous(oob = scales::oob_squish_infinite, trans="log10") +
     ggplot2::facet_wrap(~ScientificName, ncol = 1, scales = "free_y") +
@@ -46,9 +50,13 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
     #ggplot2::scale_alpha_manual(values = c(FALSE=0.7, TRUE=1)) +
     ggplot2::scale_size_manual(values = pointsize) +
     utilitybeltgg::theme_fivethirtyeight_two() +
-    ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.title.y  = ggplot2::element_blank()) +
     utilitybeltgg::theme_legend_right() +
-    ggplot2::scale_color_manual(values = c("FALSE" = "red", "TRUE" = "blue"))
+    ggplot2::scale_color_manual(values = c("FALSE" = "red", "TRUE" = "blue")) +
+    ggplot2::guides(color = guide_legend(paste0("ReadsCoveredByClade > ", supporting_reads_threshold)))
+
+  if(!show_y_axis_labels){
+   plot = plot + ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.title.y  = ggplot2::element_blank())
+  }
 
   if(show_sample_vlines){
     plot = plot + ggplot2::geom_vline(data = function(df) {df[SampleID %in% sample_of_interest,]} ,ggplot2::aes_string(xintercept = metric, linetype = "SampleID"))
@@ -67,18 +75,18 @@ kraken_report_visualise_signal_focus <- function(kraken_report_df, parent_taxids
 }
 
 
-#' Title
+#' kraken_report_visualise_single_sample
 #'
-#' @param kraken_report_df
-#' @param samples_of_interest
-#' @param rank
-#' @param taxonomy_id_to_highlight
-#' @param read_threshold
+#' @param kraken_report_df the kraken dataframe produced by \link{kraken_reports_parse} or link{kraken_report_parse}
+#' @param samples_of_interest Sample IDs whose kraken report you want to visualise (character)
+#' @param taxonomy_id_to_highlight taxonomy id to highlight (int)
+#' @param supporting_reads_threshold taxons with greater than this number of reads will be indicated using the color aesthetic (int)
+#' @inheritParams kraken_calculate_proportion_of_signal_explained_by_n_strongest_taxids
 #'
-#' @return
+#' @return ggplot object
 #' @export
 #'
-kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_interest, rank = "S",taxonomy_id_to_highlight = NULL, read_threshold = 50){
+kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_interest, rank = "S",taxonomy_id_to_highlight = NULL, supporting_reads_threshold = 50){
   assertthat::assert_that("ZscoreRobustLoggable" %in% colnames(kraken_report_df), msg = "Report dataframe must include the column [ZscoreRobustLoggable]")
 
   taxonomy_name_to_highlight <- kraken_report_df[["ScientificName"]][match(taxonomy_id_to_highlight, kraken_report_df[["TaxonomyID"]])]
@@ -87,7 +95,7 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
   gg = kraken_report_df[SampleID %in% samples_of_interest & ReadsCoveredByClade > 0 & Rank == rank,] %>%
     ggplot2::ggplot(
       ggplot2::aes(
-        color = ReadsCoveredByClade > 50,
+        color = ReadsCoveredByClade > supporting_reads_threshold,
         ReadsCoveredByClade = ReadsCoveredByClade,
         x=ZscoreRobustLoggable,
         ZscoreRobust = ZscoreRobust,
@@ -104,11 +112,12 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
     ggplot2::ggtitle(paste0(samples_of_interest, collapse = ",")) +
     ggplot2::guides(shape=ggplot2::guide_legend("Infinite")) +
     ggplot2::geom_point() +
-    ggthemes::theme_fivethirtyeight() +
+    #ggthemes::theme_fivethirtyeight() +
     #ggthemes::theme_calc() +
-    utilitybeltgg::theme_common_adjustments() +
-    #utilitybeltgg::theme_fivethirtyeight_two() +
-    ggplot2::scale_color_brewer(palette = "Set2")
+    #utilitybeltgg::theme_common_adjustments() +
+    utilitybeltgg::theme_fivethirtyeight_two() +
+    ggplot2::scale_color_brewer(palette = "Set2") +
+    ggplot2::guides(color = ggplot2::guide_legend(paste0("ReadsCoveredByClade  >", supporting_reads_threshold)))
 
   if (is.null(taxonomy_id_to_highlight)){
     #gg = gg + ggplot2::guides(color="none")

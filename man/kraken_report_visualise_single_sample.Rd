@@ -2,7 +2,7 @@
 % Please edit documentation in R/KrakenVisualise.R
 \name{kraken_report_visualise_single_sample}
 \alias{kraken_report_visualise_single_sample}
-\title{Title}
+\title{kraken_report_visualise_single_sample}
 \usage{
 kraken_report_visualise_single_sample(
   kraken_report_df,
@@ -13,11 +13,19 @@ kraken_report_visualise_single_sample(
 )
 }
 \arguments{
-\item{read_threshold}{}
+\item{kraken_report_df}{the kraken dataframe produced by \link{kraken_reports_parse} or link{kraken_report_parse}}
+
+\item{samples_of_interest}{Sample IDs whose kraken report you want to visualise (character)}
+
+\item{rank}{one of: (S, G, F, O, C, P, K). S=speies, G=genus, etc. Determines which rank in calculation of binning 'diffuseness'. You will almost always want to use species (S), maybe genus.}
+
+\item{taxonomy_id_to_highlight}{taxonomy id to highlight (int)}
+
+\item{read_threshold}{taxons with greater than this number of reads will be indicated using the color aesthetic (int)}
 }
 \value{
-
+ggplot object
 }
 \description{
-Title
+kraken_report_visualise_single_sample
 }

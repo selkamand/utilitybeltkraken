@@ -7,7 +7,9 @@
 kraken_report_visualise_distributions(
   kraken_report_df,
   taxids_of_interest,
+  y_aesthetic = "ScientificName",
   metric = "ZscoreRobust",
+  show_y_axis_labels = FALSE,
   show_sample_vlines = FALSE,
   supporting_reads_threshold = 50,
   sample_of_interest = NA,
@@ -20,7 +22,7 @@ kraken_report_visualise_distributions(
 \arguments{
 \item{kraken_report_df}{the kraken dataframe produced by \link{kraken_reports_parse} or link{kraken_report_parse}}
 
-\item{taxids_of_interest}{}
+\item{taxids_of_interest}{taxonomy ids to show as distinct facets}
 }
 \value{
 
