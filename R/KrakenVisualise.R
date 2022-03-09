@@ -32,6 +32,11 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
   subset_df = subset_df[, `:=`(SampleOfInterest = SampleID %in% sample_of_interest)]
   subset_df = subset_df[, `:=` (Shape = data.table::fcase(SampleOfInterest, "Sample of Interest", is.infinite(get(metric)), "Infinite", default = "General Sample"))]
 
+  # Relevel factors so order of taxids_of_interest means something
+  scientific_names = subset_df$ScientificName[match(taxids_of_interest, subset_df$TaxonomyID)]
+  subset_df = subset_df[, ScientificName := forcats::fct_relevel(ScientificName, scientific_names)]
+
+
   #subset_df = subset_df[, `:=`(ReadsCoveredByCladeBinned = data.table::fcase(ReadsCoveredByClade < 50, "< 50", ReadsCoveredByClade < 1e3, "< 1000", ReadsCoveredByClade < 1e6, "< 1,000,000", default = ">= 1,000,000")) ]
 
   set.seed(seed)
