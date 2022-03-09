@@ -52,7 +52,7 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
     utilitybeltgg::theme_fivethirtyeight_two() +
     utilitybeltgg::theme_legend_right() +
     ggplot2::scale_color_manual(values = c("FALSE" = "red", "TRUE" = "blue")) +
-    ggplot2::guides(color = guide_legend(paste0("ReadsCoveredByClade > ", supporting_reads_threshold)))
+    ggplot2::guides(color = ggplot2::guide_legend(paste0("ReadsCoveredByClade > ", supporting_reads_threshold)))
 
   if(!show_y_axis_labels){
    plot = plot + ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.title.y  = ggplot2::element_blank())

@@ -70,7 +70,7 @@ kraken_info_standardised_metrics <- function(){
 kraken_report_add_zscore <- function(kraken_report_df){
   message("Adding columns: [Zscore & ZscoreLoggable] to kraken report datatable")
   kraken_report_df[, `:=`(Zscore = Zscore(RPM)), by = .(TaxonomyID)]
-  kraken_report_df[, `:=`(ZscoreLoggable = MakeLoggable(Zscore)), by = .(TaxonomyID)]
+  kraken_report_df[, `:=`(ZscoreLoggable = MakeLoggable(Zscore))]
   return(invisible(NULL))
 }
 
@@ -85,7 +85,17 @@ kraken_report_add_zscore <- function(kraken_report_df){
 kraken_report_add_robust_zscore <- function(kraken_report_df){
   message("Adding columns: [ZscoreRobust & ZscoreRobustLoggable] to kraken report datatable")
   kraken_report_df[, `:=`(ZscoreRobust = ZscoreRobust(RPM)), by = .(TaxonomyID)]
-  kraken_report_df[, `:=`(ZscoreRobustLoggable = MakeLoggable(ZscoreRobust)), by = .(TaxonomyID)]
+  kraken_report_df[, `:=`(ZscoreRobustLoggable = MakeLoggable(ZscoreRobust))]
+
+  # browser()
+  # kraken_report_df %>%
+  #   dtplyr::lazy_dt(immutable = FALSE) %>%
+  #   dplyr::group_by(TaxonomyID) %>%
+  #     ZscoreRobust =  ZscoreRobust(RPM),
+  #     ZscoreRobustLoggable = MakeLoggable(ZscoreRobust)
+  #     ) %>%
+  #   dplyr::ungroup() %>%
+  #   data.table::as.data.table()
   return(invisible(NULL))
 }
 
@@ -101,7 +111,7 @@ kraken_report_add_robust_zscore <- function(kraken_report_df){
 kraken_report_add_median_centered_iqr_scaled_metric <- function(kraken_report_df){
   message("Adding columns: [MedianIQR & MedianIQRLoggable] to kraken report datatable")
   kraken_report_df[, `:=`(MedianIQR = MedianIQR(RPM)), by = .(TaxonomyID)]
-  kraken_report_df[, `:=`(MedianIQRLoggable = MakeLoggable(MedianIQR)), by = .(TaxonomyID)]
+  kraken_report_df[, `:=`(MedianIQRLoggable = MakeLoggable(MedianIQR))]
   return(invisible(NULL))
 }
 
@@ -132,7 +142,7 @@ kraken_report_add_median_centered_qn_scaled_metric <- function(kraken_report_df)
 kraken_report_add_median_centered_tau2_scaled_metric <- function(kraken_report_df){
   message("Adding columns: [MedianTau2 & MedianTau2Loggable] to kraken report datatable")
   kraken_report_df[, `:=`(MedianTau2 = MedianTau2(RPM)), by = .(TaxonomyID)]
-  kraken_report_df[, `:=`(MedianTau2Loggable = MakeLoggable(MedianTau2)), by = .(TaxonomyID)]
+  kraken_report_df[, `:=`(MedianTau2Loggable = MakeLoggable(MedianTau2))]
   return(invisible(NULL))
 }
 
