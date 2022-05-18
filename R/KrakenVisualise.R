@@ -8,14 +8,15 @@
 #' @export
 #'
 kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_interest, y_aesthetic = "ScientificName", metric = "ZscoreRobust", show_y_axis_labels = FALSE,show_sample_vlines = FALSE, supporting_reads_threshold = 50, sample_of_interest = NA, use_loggable_version = TRUE, seed = 1, pointsize = c(1, 2), ...){
-
+  is_db = "tbl_sql" %in% class(kraken_report_df)
 
   # Defensive Assertions
   standardised_metrics = c("Zscore", "ZscoreRobust", "MedianIQR", "MedianQn", "MedianTau2")
   assertthat::assert_that(assertthat::is.string(metric))
   assertthat::assert_that(metric %in% standardised_metrics, msg = paste0("metric (", metric,") must be one of: [", paste0(standardised_metrics, collapse = ", "), "]"))
-  assertthat::assert_that(is.data.frame(kraken_report_df))
-  assertthat::assert_that(y_aesthetic %in% colnames(kraken_report_df))
+  #assertthat::assert_that(is.data.frame(kraken_report_df))
+  assertthat::assert_that(y_aesthetic %in% colnames(kraken_report_df)) #Change this once we add the option to y_aesthetic by metadata
+
   if(use_loggable_version) metric <- paste0(metric, "Loggable")
   assertthat::assert_that(metric %in% colnames(kraken_report_df), msg = paste0("kraken_report_df must contain the column: [", metric, "]. Please see ?kraken_info_standardised_metrics for information on how to add standard metrics to your dataframe."))
   columns = c("SampleID", "TaxonomyID", "ScientificName", "ReadsCoveredByClade", "RPM", metric, "ZscoreRobust")
@@ -26,28 +27,44 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
   # Warning messages
   if(y_aesthetic != "ScientificName"){ message("You've chosen to set a Y aesthetic - you will probably want to also set show_y_axis_labels = TRUE ")}
 
-
   # Subset the data
-  subset_df = kraken_report_df[TaxonomyID %in% taxids_of_interest][, `:=` (Infinite = is.infinite(get(metric)))]
-  subset_df = subset_df[, `:=`(SampleOfInterest = SampleID %in% sample_of_interest)]
-  subset_df = subset_df[, `:=` (Shape = data.table::fcase(SampleOfInterest, "Sample of Interest", is.infinite(get(metric)), "Infinite", default = "General Sample"))]
+  subset_df = kraken_report_df %>%
+    dplyr::filter(TaxonomyID %in% taxids_of_interest) #%>%
+    #dplyr::select(SampleID, ScientificName, ZscoreRobust,ZscoreRobustLoggable, TaxonomyID, ReadsCoveredByClade, RPM)
+
+  if(is_db)
+    subset_df = dplyr::collect(subset_df)
+
+  subset_df <- subset_df %>%
+    dplyr::mutate(
+      Infinite = is.infinite(subset_df[[metric]]),
+      SampleOfInterest = SampleID %in% sample_of_interest,
+      Shape = data.table::fcase(SampleOfInterest, "Sample of Interest", is.infinite(get(metric)), "Infinite", default = "General Sample")
+      )
 
   # Relevel factors so order of taxids_of_interest means something
   scientific_names = subset_df$ScientificName[match(taxids_of_interest, subset_df$TaxonomyID)]
-  subset_df = subset_df[, ScientificName := forcats::fct_relevel(ScientificName, scientific_names)]
+  #browser()
+  subset_df <- subset_df %>%
+    mutate(ScientificName = forcats::fct_relevel(ScientificName, scientific_names))
 
-
-  #subset_df = subset_df[, `:=`(ReadsCoveredByCladeBinned = data.table::fcase(ReadsCoveredByClade < 50, "< 50", ReadsCoveredByClade < 1e3, "< 1000", ReadsCoveredByClade < 1e6, "< 1,000,000", default = ">= 1,000,000")) ]
 
   set.seed(seed)
 
   # d = subset_df[SampleID == sample_of_interest,]
   pos_jitter = ggplot2::position_jitter(width = 0, height = 0.5, seed = seed)
 
+  #browser()
   plot = subset_df %>%
     ggplot2::ggplot(ggplot2::aes_string(x = metric, y= y_aesthetic, SampleID = "SampleID", ReadsCoveredByClade = "ReadsCoveredByClade", RPM = "RPM", Metric = metric, ZscoreRobust = "ZscoreRobust", customdata = "SampleID", ...), alpha = 0.5) +
-    ggplot2::geom_jitter(position = pos_jitter, ggplot2::aes(shape = Shape, color =  ReadsCoveredByClade > supporting_reads_threshold, size = SampleOfInterest)) +
-    #ggplot2::geom_jitter(position = pos_jitter, ggplot2::aes(shape = Infinite, color =  ReadsCoveredByClade > 50), stroke = 2) +
+    ggplot2::geom_jitter(
+      data=~dplyr::filter(.x, !SampleOfInterest),
+      position = pos_jitter,
+      ggplot2::aes(
+        shape = Shape,
+        color =  ReadsCoveredByClade > supporting_reads_threshold,
+        size = SampleOfInterest)
+      ) +
     ggplot2::scale_x_continuous(oob = scales::oob_squish_infinite, trans="log10") +
     ggplot2::facet_wrap(~ScientificName, ncol = 1, scales = "free_y") +
     #ggplot2::theme(strip.text.x = ggplot2::element_blank()) +
@@ -59,8 +76,29 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
     ggplot2::scale_color_manual(values = c("FALSE" = "red", "TRUE" = "blue")) +
     ggplot2::guides(color = ggplot2::guide_legend(paste0("ReadsCoveredByClade > ", supporting_reads_threshold)))
 
+
+  if(sum(subset_df[["SampleOfInterest"]]) > 0  ){
+    message("Drawing Samples Of Interest ")
+    plot <- plot + ggplot2::geom_jitter(
+        data=~dplyr::filter(.x, SampleOfInterest),
+        position = pos_jitter,
+        ggplot2::aes(
+          shape = Shape,
+          color =  ReadsCoveredByClade > supporting_reads_threshold,
+          size = SampleOfInterest)
+        ) +
+      ggplot2::geom_vline(
+        data=~dplyr::filter(.x, SampleOfInterest),
+        color = "green",
+        size = 2,
+        ggplot2::aes_string(
+          linetype = "SampleOfInterest",
+          xintercept = metric)
+        )
+  }
+
   if(!show_y_axis_labels){
-   plot = plot + ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.title.y  = ggplot2::element_blank())
+    plot = plot + ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.title.y  = ggplot2::element_blank())
   }
 
   if(show_sample_vlines){
@@ -69,6 +107,7 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
 
   return(plot)
 }
+
 
 kraken_report_visualise_signal_focus <- function(kraken_report_df, parent_taxids){
 
@@ -94,10 +133,19 @@ kraken_report_visualise_signal_focus <- function(kraken_report_df, parent_taxids
 kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_interest, rank = "S",taxonomy_id_to_highlight = NULL, supporting_reads_threshold = 50){
   assertthat::assert_that("ZscoreRobustLoggable" %in% colnames(kraken_report_df), msg = "Report dataframe must include the column [ZscoreRobustLoggable]")
 
+  is_db = "tbl_sql" %in% class(kraken_report_df)
+
   taxonomy_name_to_highlight <- kraken_report_df[["ScientificName"]][match(taxonomy_id_to_highlight, kraken_report_df[["TaxonomyID"]])]
 
+  data = kraken_report_df %>%
+    dplyr::filter(SampleID %in% samples_of_interest & ReadsCoveredByClade > 0 & Rank == rank)
+
+  if(is_db)
+     data <- dplyr::collect(data)
+
   #browser()
-  gg = kraken_report_df[SampleID %in% samples_of_interest & ReadsCoveredByClade > 0 & Rank == rank,] %>%
+  #browser()
+  gg = data %>%
     ggplot2::ggplot(
       ggplot2::aes(
         color = ReadsCoveredByClade > supporting_reads_threshold,
@@ -136,6 +184,7 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
   return(gg)
 
 }
+
 
 #' Interactive Single Sample Visualisation
 #'

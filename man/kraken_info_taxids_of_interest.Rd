@@ -7,7 +7,7 @@
 kraken_info_taxids_of_interest(purpose = "info")
 }
 \arguments{
-\item{purpose}{one of ("general" or "humaninfectiondetection", or "pedcanviral")}
+\item{purpose}{one of ("info","general", "Detecting Infection from Human Samples", "Detecting Viruses Potentially Related to Paediatric Cancer")}
 }
 \value{
 Named numeric vector with some commonly used taxids (returns invisible vector)

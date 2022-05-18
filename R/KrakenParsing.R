@@ -93,6 +93,11 @@ kraken_reports_parse <- function(kraken2directory){
   #Add SampleID column derived from report filename
   kraken_reports_df[, `:=`(SampleID = stringr::str_replace(string = Filename, pattern = '\\..*', replacement = ""))]
 
+  # Assert that theres no files describing the same sample.
+  n_samples = dplyr::n_distinct(kraken_reports_df[,SampleID])
+  n_files = dplyr::n_distinct(kraken_reports_df[,Filename])
+  assertthat::assert_that(n_files == n_samples, msg = paste0("The number of files [", n_files ,"] is not the same as the number of distinct sample IDs [", n_samples,"].  Sample IDs are extrapolated from filenames, so please ensure files are named appropriately (i.e. filenames start with a unique sampleID, where the end of the sampleID is indicated by a period. e.g. `sample1.kreport`)"))
+
   # Recalculate Percent Reads Covered as normalised score. Due to no. of sci figures supported by kraken2 - clades with 100,000 reads classifed will still come out as '0%'. We fix this below
   #total_reads = sum(kraken_reports_df$ReadsDirectlyAssigned)
   #kraken_reports_df[, `:=`(PercentReadsCoveredByClade = ReadsCoveredByClade*100/total_reads) ]
@@ -224,7 +229,7 @@ kraken_calculate_proportion_of_signal_explained_by_n_strongest_taxids <- functio
 #' Taxids of Interest
 #'
 #'
-#' @param purpose one of ("general" or "humaninfectiondetection", or "pedcanviral")
+#' @param purpose one of ("info","general", "Detecting Infection from Human Samples", "Detecting Viruses Potentially Related to Paediatric Cancer")
 #'
 #' @return Named numeric vector with some commonly used taxids (returns invisible vector)
 #' @export
@@ -299,10 +304,14 @@ kraken_info_taxids_of_interest <- function(purpose = "info"){
     stop("purpose must be one of: ",paste0(purpose_possible_values, collapse=", "))
 }
 
-KrakenParsingSingleFileAddLineage <- function(krakenreport){
-  kreport_headings <- c("PercentReadsCoveredByCladeLowResolution","ReadsCoveredByClade", "ReadsDirectlyAssigned", "Rank", "TaxonomyID", "ScientificName")
-  data.table::fread(col.names = kreport_headings, sep="\t", strip.white = FALSE) %>%
-  magrittr::set_names(basename(krakenreport))
+#' Write Kraken TSV
+#'
+#' @inheritParams kraken_report_add_descendancy_status
+#' @param filepath filename/path to write tab-separated dataframe to
+#'
+#' @return Run for its side effects
+#' @export
+#'
+kraken_write_tsv <- function(kraken_report_df, filepath = paste0("kraken_report_database_",Sys.Date(), ".tsv")){
+  data.table::fwrite(file = filepath, sep="\t")
 }
-
-

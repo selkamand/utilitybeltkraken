@@ -5,3 +5,4 @@
 .DS_Store
 TestingGrounds.R
 inst
+kraken_report_database.sqlite

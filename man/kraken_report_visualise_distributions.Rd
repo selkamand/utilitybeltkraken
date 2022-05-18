@@ -25,7 +25,7 @@ kraken_report_visualise_distributions(
 \item{taxids_of_interest}{taxonomy ids to show as distinct facets}
 }
 \value{
-
+ggplot
 }
 \description{
 Visualise Distribution

@@ -9,7 +9,7 @@ kraken_report_visualise_single_sample(
   samples_of_interest,
   rank = "S",
   taxonomy_id_to_highlight = NULL,
-  read_threshold = 50
+  supporting_reads_threshold = 50
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ kraken_report_visualise_single_sample(
 
 \item{taxonomy_id_to_highlight}{taxonomy id to highlight (int)}
 
-\item{read_threshold}{taxons with greater than this number of reads will be indicated using the color aesthetic (int)}
+\item{supporting_reads_threshold}{taxons with greater than this number of reads will be indicated using the color aesthetic (int)}
 }
 \value{
 ggplot object
