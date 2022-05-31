@@ -50,7 +50,7 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
   message("Creating TaxonomyID, ScientificName Index:")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE INDEX taxonomy_sample_index
-    ON species (TaxonomyID, ScientificName);
+    ON ",table_name," (TaxonomyID, ScientificName);
     "))
 
   DBI::dbDisconnect(kreport_sqlite_db)
