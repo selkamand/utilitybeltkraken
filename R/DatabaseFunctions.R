@@ -22,7 +22,7 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
    else message("Overwriting existing database ... ")
   }
 
-  message("Creating sqlite database [",tools::file_path_as_absolute(database_name),"]")
+  message("Creating sqlite database [",database_name,"]")
   kreport_sqlite_db <- DBI::dbConnect(RSQLite::SQLite(), database_name)
 
   message("Converting kraken_report_df to sqlite database table [",table_name,"]")
@@ -57,6 +57,10 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
 
   message("")
   message("All Finished!
+
+          Database files can be found at: ",
+          message(tools::file_path_as_absolute(database_name))
+          ,"\n
 
           Connect to the database using the following code snippet:
           DBI::dbConnect(
