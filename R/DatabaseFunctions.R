@@ -28,6 +28,8 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
   message("Converting kraken_report_df to sqlite database table [",table_name,"]")
   DBI::dbWriteTable(kreport_sqlite_db, name = table_name, value = kraken_report_df, overwrite = TRUE)
 
+
+  # Indexing ----------------------------------------------------------------
   message("Creating SampleID TaxonomyID multicolumn index:")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE INDEX sample_taxonomy_index
@@ -42,20 +44,20 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
     "))
 
 
+  message("Creating TaxonomyID, ScientificName Index:")
+  DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
+    "CREATE INDEX taxonomy_scientific_name_index
+    ON ",table_name," (TaxonomyID, ScientificName);
+    "))
+
+  # Create Views ----------------------------------------------------------------
   message("Creating TaxonomyID to ScientificName Mapping Views:")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE VIEW species AS
     SELECT DISTINCT(TaxonomyID, ScientificName) FROM ",table_name, ";"))
 
-  message("Creating TaxonomyID, ScientificName Index:")
-  DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
-    "CREATE INDEX taxonomy_sample_index
-    ON ",table_name," (TaxonomyID, ScientificName);
-    "))
-
   DBI::dbDisconnect(kreport_sqlite_db)
 
-  message("")
   message("All Finished!
 
           Database files can be found at: ",
