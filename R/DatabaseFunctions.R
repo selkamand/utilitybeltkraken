@@ -13,13 +13,17 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
 
   if(file.exists(database_name)){
     message("Already found a database file with the given name [", tools::file_path_as_absolute(database_name), "]")
-   overwrite = askYesNo(msg = paste0("Are you sure you want to overwrite the existing database"))
+   overwrite = askYesNo(msg = paste0("Are you sure you want to overwrite the existing database [",database_name,"]"))
 
     if(!overwrite){
       message("Leaving database untouched")
       return()
     }
-   else message("Overwriting existing database ... ")
+   else {
+     message("Overwriting existing database ... ")
+     file.remove(tools::file_path_as_absolute(database_name))
+   }
+
   }
 
   message("Creating sqlite database [",database_name,"]")
