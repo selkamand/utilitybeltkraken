@@ -141,6 +141,9 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
   data = kraken_report_df %>%
     dplyr::filter(SampleID %in% samples_of_interest & ReadsCoveredByClade > 0 & Rank == rank)
 
+  if(is_db)
+    data <- dplyr::collect(data)
+
   if(type_of_taxids_to_show == "bacterial"){
     message("Including only ", type_of_taxids_to_show, " taxids in plot")
     data = data %>%
@@ -168,12 +171,7 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
   }
   else if(type_of_taxids_to_show == "all"){
    message("Including all taxids in plot")
-
   }
-
-
-  if(is_db)
-     data <- dplyr::collect(data)
 
   #browser()
   #browser()
