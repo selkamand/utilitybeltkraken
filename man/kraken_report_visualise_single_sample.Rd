@@ -9,7 +9,8 @@ kraken_report_visualise_single_sample(
   samples_of_interest,
   rank = "S",
   taxonomy_id_to_highlight = NULL,
-  supporting_reads_threshold = 50
+  supporting_reads_threshold = 50,
+  type_of_taxids_to_show = c("all", "bacterial", "viral", "fungal", "sar")
 )
 }
 \arguments{

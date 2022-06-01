@@ -130,8 +130,9 @@ kraken_report_visualise_signal_focus <- function(kraken_report_df, parent_taxids
 #' @return ggplot object
 #' @export
 #'
-kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_interest, rank = "S",taxonomy_id_to_highlight = NULL, supporting_reads_threshold = 50){
+kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_interest, rank = "S",taxonomy_id_to_highlight = NULL, supporting_reads_threshold = 50, type_of_taxids_to_show = c("all", "bacterial", "viral", "fungal", "sar")){
   assertthat::assert_that("ZscoreRobustLoggable" %in% colnames(kraken_report_df), msg = "Report dataframe must include the column [ZscoreRobustLoggable]")
+  type_of_taxids_to_show = rlang::arg_match(type_of_taxids_to_show)
 
   is_db = "tbl_sql" %in% class(kraken_report_df)
 
@@ -139,6 +140,37 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
 
   data = kraken_report_df %>%
     dplyr::filter(SampleID %in% samples_of_interest & ReadsCoveredByClade > 0 & Rank == rank)
+
+  if(type_of_taxids_to_show == "bacterial"){
+    message("Including only ", type_of_taxids_to_show, " taxids in plot")
+    data = data %>%
+      dplyr::filter(TaxonomyID %in% ncbitaxids::taxids_load_list("all_bacterial_taxids.05_05_2022"))
+  }
+  else if(type_of_taxids_to_show == "viral"){
+    message("Including only ", type_of_taxids_to_show, " taxids in plot")
+    data = data %>%
+      dplyr::filter(TaxonomyID %in% ncbitaxids::taxids_load_list("all_viral_taxids.05_05_2022"))
+  }
+  else if(type_of_taxids_to_show == "fungal"){
+    message("Including only ", type_of_taxids_to_show, " taxids in plot")
+    data = data %>%
+      dplyr::filter(TaxonomyID %in% ncbitaxids::taxids_load_list("all_fungal_taxids.05_05_2022"))
+  }
+  else if(type_of_taxids_to_show == "sar"){
+    message("Including only ", type_of_taxids_to_show, " taxids in plot")
+    data = data %>%
+      dplyr::filter(TaxonomyID %in% ncbitaxids::taxids_load_list("all_sar_taxids.05_05_2022"))
+  }
+  else if(type_of_taxids_to_show == "sar"){
+    message("Including only ", type_of_taxids_to_show, " taxids in plot")
+    data = data %>%
+      dplyr::filter(TaxonomyID %in% ncbitaxids::taxids_load_list("all_sar_taxids.05_05_2022"))
+  }
+  else if(type_of_taxids_to_show == "all"){
+   message("Including all taxids in plot")
+
+  }
+
 
   if(is_db)
      data <- dplyr::collect(data)

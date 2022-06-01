@@ -24,11 +24,15 @@ Imports:
     ggplot2,
     ggrepel,
     magrittr,
+    ncbitaxids (>= 0.0.0.9000),
     plotly,
     purrr,
+    rlang,
     robustbase,
     RSQLite,
     scales,
     stringr,
     tidyr,
     utilitybeltgg
+Remotes:  
+    selkamand/ncbitaxids
