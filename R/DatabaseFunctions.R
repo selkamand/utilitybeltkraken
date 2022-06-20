@@ -54,17 +54,17 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
     ON ",table_name," (TaxonomyID, ScientificName);
     "))
 
-  message("Creating Zscore, RPM Index")
+  message("Creating Rank, Zscore, RPM Index")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
-    "CREATE INDEX zscore_rpm
-    ON ",table_name," (ZscoreRobust, RPM);
+    "CREATE INDEX rank_zscore_rpm
+    ON ",table_name," (Rank, ZscoreRobust, RPM);
     "))
 
-  message("Creating Rank Index")
-  DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
-    "CREATE INDEX rank
-    ON ",table_name," (Rank);
-    "))
+  # message("Creating Rank Index")
+  # DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
+  #   "CREATE INDEX rank
+  #   ON ",table_name," (Rank);
+  #   "))
 
   # Create Views ----------------------------------------------------------------
   message("Creating TaxonomyID to ScientificName Mapping Views:")
