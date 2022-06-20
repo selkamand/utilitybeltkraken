@@ -9,11 +9,11 @@
 #' @return Name of the Database Created (string). Primarily Run for its side effects
 #' @export
 #'
-kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(getwd(),"/kraken_report_database.sqlite"), table_name = "kreports"){
+kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(getwd(),"/kraken_report_database.sqlite"), table_name = "kreports", overwrite = TRUE){
 
   if(file.exists(database_name)){
     message("Already found a database file with the given name [", tools::file_path_as_absolute(database_name), "]")
-   overwrite = askYesNo(msg = paste0("Are you sure you want to overwrite the existing database [",database_name,"]"))
+   #overwrite = askYesNo(msg = paste0("Are you sure you want to overwrite the existing database [",database_name,"]"))
 
     if(!overwrite){
       message("Leaving database untouched")
