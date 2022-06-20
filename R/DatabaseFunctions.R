@@ -54,6 +54,13 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
     ON ",table_name," (TaxonomyID, ScientificName);
     "))
 
+  message("Creating Zscore, RPM Index")
+  DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
+    "CREATE INDEX zscore_rpm
+    ON ",table_name," (ZscoreRobust, RPM);
+    "))
+
+
   # Create Views ----------------------------------------------------------------
   message("Creating TaxonomyID to ScientificName Mapping Views:")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
