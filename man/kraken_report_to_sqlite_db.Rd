@@ -7,7 +7,8 @@
 kraken_report_to_sqlite_db(
   kraken_report_df,
   database_name = paste0(getwd(), "/kraken_report_database.sqlite"),
-  table_name = "kreports"
+  table_name = "kreports",
+  overwrite = TRUE
 )
 }
 \arguments{

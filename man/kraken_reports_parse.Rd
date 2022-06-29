@@ -13,5 +13,5 @@ kraken_reports_parse(kraken2directory)
 a dataframe describing all samples kraken reports
 }
 \description{
-Parse Kraken Reports
+To parse a single kraken report - see
 }

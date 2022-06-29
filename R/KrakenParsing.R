@@ -1,62 +1,53 @@
-#' kraken_report_parse
-#'
-#' If you want to import multiple reports use \strong{kraken_report_parses}
-#'
-#' @param kraken2report path to kraken directory (string)
-#' @param sample_id (string)
-#'
-#' @return dataframe describing the kraken report
-#' @export
-#'
-kraken_report_parse2 <- function(kraken2report, sample_id=NA){
-  # Read Data
-  kreport_headings <- c("PercentReadsCoveredByCladeLowResolution","ReadsCoveredByClade", "ReadsDirectlyAssigned", "Rank", "TaxonomyID", "ScientificName")
-  kraken_df <- read.csv(file = kraken2report, header = FALSE, sep = "\t", col.names = kreport_headings)
-
-  #Use number of indents in scientific name to extrapolate depth
-  kraken_df$Level <- stringr::str_count(kraken_df$ScientificName, pattern = "  ")
-  kraken_df$LevelDrops <- c(kraken_df$Level[-length(kraken_df$Level)]-kraken_df$Level[-1] < 0, FALSE)
-  # Strip tabs from scientific name column
-  kraken_df$ScientificName <- sub(x = kraken_df$ScientificName, pattern = "^ +", replacement = "")
-
-  # Simplify Rank code - We don't care about differentiating between S, S1, or S2 ranks - theyre all species level
-  kraken_df$RankSimple <- gsub(x = kraken_df$Rank, pattern = "[0-9]", replacement = "")
-
-  # Recalculate Percent Reads Covered as normalised score. Due to no. of sci figures supported by kraken2 - clades with 100,000 reads classifed will still come out as '0%'. We fix this below
-  total_reads = sum(kraken_df$ReadsDirectlyAssigned)
-  kraken_df$PercentReadsCoveredByClade <- kraken_df$ReadsCoveredByClade*100/total_reads
-
-  # Calculate RPM (reads covered by clade per million total reads
-  kraken_df$RPM <- kraken_df$ReadsCoveredByClade*1e6/total_reads
-
-  #Add SampleID column derived from report filename
-  if(is.na(sample_id))
-    kraken_df$SampleID = sub(x=basename(kraken2report), pattern = '\\..*', replacement = "")
-  else
-    kraken_df$SampleID = sample_id
-  return(kraken_df)
-}
 
 #' Parse Kraken Reports
 #'
-#' @param kraken2directory path to a directory filled with ONLY kraken2 reports
+#' @param path_to_kreport path to kraken report
+#' @param sample_id  sample identifier. By default will guess from the filename (takes everything before the first '.' as sample name)
 #'
 #' @return a dataframe describing all samples kraken reports
 #' @export
-kraken_reports_parse2 <- function(kraken2directory){
-  krakenreportpaths <- dir(path = kraken2directory, full.names = TRUE, recursive = FALSE, include.dirs = FALSE)
-  #browser()
-  kraken_repots_df <- purrr::map_dfr(
-    krakenreportpaths,
-    ~ kraken_report_parse(
-        kraken2report = .x
-      )
-    )
-  # Maybe add code to make sure all samples have the same number of rows
+#'
+kraken_report_parse <- function(path_to_kreport, sample_id = NULL, verbose = TRUE) {
+
+  kreport_basename = basename(path_to_kreport)
+
+  assertthat::assert_that(file.exists(path_to_kreport), msg = paste0("Could not find file: ", path_to_kreport))
+
+  kreport_headings <- c("PercentReadsCoveredByCladeLowResolution","ReadsCoveredByClade", "ReadsDirectlyAssigned", "Rank", "TaxonomyID", "ScientificName")
+
+  # Read Files into data.table
+  kraken_reports_df <- data.table::fread(path_to_kreport, col.names = kreport_headings, sep="\t", strip.white = FALSE)
+
+  #Use number of indents in scientific name to extrapolate depth
+  kraken_reports_df[, `:=` (Level = stringr::str_count(ScientificName, pattern = "  "))]
+
+  # Strip tabs from scientific name column
+  kraken_reports_df[, `:=` (ScientificName = stringr::str_replace(string = ScientificName, pattern = "^ +", replacement = ""))]
+  #kraken_df$ScientificName <- sub(x = kraken_df$ScientificName, pattern = "^ +", replacement = "")
+
+  # Simplify Rank code - In case we don't care about differentiating between S, S1, or S2 ranks - theyre all species level -- most of the time original rankings should be fine
+  kraken_reports_df[, `:=` (RankSimple = stringr::str_replace_all(string =  Rank, pattern = "[0-9]", replacement = ""))]
+
+  if(is.null(sample_id)){
+    if (verbose) message("No Sample ID supplied (sample_id = NULL) ... Guessing SampleID from filename (assuming everything before first '.' is the sample ID)")
+    #Add SampleID column derived from report filename
+    kraken_reports_df[, `:=`(SampleID = stringr::str_replace(string = kreport_basename, pattern = '\\..*', replacement = ""))]
+  }
+  else{
+    assertthat::assert_that(assertthat::is.string(sample_id), msg = paste0("User-specified sample identifier must be a string, not a [", class(sample_id) ,"]"))
+    kraken_reports_df[, `:=`(SampleID = sample_id)]
+  }
+
+  # Calculate RPM (reads covered by clade per million total reads
+  kraken_reports_df[, `:=`(total_reads_in_sample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
+  kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade * 1e+06/total_reads_in_sample)]
+
+  return(kraken_reports_df)
 }
 
-
 #' Parse Kraken Reports
+#'
+#' To parse a single kraken report - see
 #'
 #' @param kraken2directory path to a directory filled with ONLY kraken2 reports
 #'
@@ -74,13 +65,10 @@ kraken_reports_parse <- function(kraken2directory){
       magrittr::set_names(basename(krakenreportpaths)),
     idcol = "Filename")
 
-  #browser()
+
   #Use number of indents in scientific name to extrapolate depth
   kraken_reports_df[, `:=` (Level = stringr::str_count(ScientificName, pattern = "  "))]
-  #kraken_reports_df$Level <- stringr::str_count(kraken_df$ScientificName, pattern = "  ")
 
-  #kraken_reports_df[, `:=` (LevelDrops = c(kraken_df$Level[-length(kraken_df$Level)]-kraken_df$Level[-1] < 0, FALSE))]
-  #kraken_df$LevelDrops <- c(kraken_df$Level[-length(kraken_df$Level)]-kraken_df$Level[-1] < 0, FALSE)
 
   # Strip tabs from scientific name column
   kraken_reports_df[, `:=` (ScientificName = stringr::str_replace(string = ScientificName, pattern = "^ +", replacement = ""))]
@@ -88,7 +76,6 @@ kraken_reports_parse <- function(kraken2directory){
 
   # Simplify Rank code - In case we don't care about differentiating between S, S1, or S2 ranks - theyre all species level -- most of the time original rankings should be fine
   kraken_reports_df[, `:=` (RankSimple = stringr::str_replace_all(string =  Rank, pattern = "[0-9]", replacement = ""))]
-  #kraken_df$RankSimple <- gsub(x = kraken_df$Rank, pattern = "[0-9]", replacement = "")
 
   #Add SampleID column derived from report filename
   kraken_reports_df[, `:=`(SampleID = stringr::str_replace(string = Filename, pattern = '\\..*', replacement = ""))]
@@ -98,25 +85,11 @@ kraken_reports_parse <- function(kraken2directory){
   n_files = dplyr::n_distinct(kraken_reports_df[,Filename])
   assertthat::assert_that(n_files == n_samples, msg = paste0("The number of files [", n_files ,"] is not the same as the number of distinct sample IDs [", n_samples,"].  Sample IDs are extrapolated from filenames, so please ensure files are named appropriately (i.e. filenames start with a unique sampleID, where the end of the sampleID is indicated by a period. e.g. `sample1.kreport`)"))
 
-  # Recalculate Percent Reads Covered as normalised score. Due to no. of sci figures supported by kraken2 - clades with 100,000 reads classifed will still come out as '0%'. We fix this below
-  #total_reads = sum(kraken_reports_df$ReadsDirectlyAssigned)
-  #kraken_reports_df[, `:=`(PercentReadsCoveredByClade = ReadsCoveredByClade*100/total_reads) ]
-
-  #kraken_reports_df
-  # total_reads = sum(kraken_df$ReadsDirectlyAssigned)
-  # kraken_df$PercentReadsCoveredByClade <- kraken_df$ReadsCoveredByClade*100/total_reads
-  #browser()
   # Calculate RPM (reads covered by clade per million total reads
   kraken_reports_df[, `:=`(total_reads_in_sample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
-  #kraken_reports_df[, `:=`(total_reads_in_sample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
   kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade * 1e+06/total_reads_in_sample)]
-  #kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade*1e6/total_reads)]
-  #kraken_df$RPM <- kraken_df$ReadsCoveredByClade*1e6/total_reads
 
-  #kraken_df$SampleID = sub(x=basename(kraken2report), pattern = '\\..*', replacement = "")
   return(kraken_reports_df)
-
-  # Maybe add code to make sure all samples have the same number of rows
 }
 
 #' Identify Taxid Descendancy Status
