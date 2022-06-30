@@ -27,9 +27,9 @@ kraken_report_get_child_taxids <- function(path_to_kraken_report, taxid, inclusi
   level_of_specified_taxid = kraken_report_df[[row_containing_taxid, "Level"]]
   rows_with_levels_equivalent_or_lower_than_taxid <- which(kraken_report_df[["Level"]] <= level_of_specified_taxid)
 
-  first_row_since_taxid_thats_not_its_child = rows_with_levels_equivalent_or_lower_than_taxid[rows_with_levels_equivalent_or_lower_than_taxid > row_containing_taxid]
+  first_row_since_taxid_thats_not_its_child = rows_with_levels_equivalent_or_lower_than_taxid[rows_with_levels_equivalent_or_lower_than_taxid > row_containing_taxid][1]
 
-  if(length(first_row_since_taxid_thats_not_its_child) == 0){
+  if(is.na(first_row_since_taxid_thats_not_its_child)){
     first_row_since_taxid_thats_not_its_child = nrow(kraken_report_df)+1
   }
 
