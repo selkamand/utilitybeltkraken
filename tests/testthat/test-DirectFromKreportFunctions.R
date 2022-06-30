@@ -71,4 +71,15 @@ expect_warning(
     object = kraken_report_get_child_taxids(testkreport_path, 1236, inclusive = TRUE),
     expected = c(1236, 72274, 135621, 286, 136841, 287, 91347, 543, 561, 562)
   )
+
+  # exluding children without reads directly classified works
+  expect_equal(
+    object = kraken_report_get_child_taxids(testkreport_path, 543, inclusive = TRUE, exclude_children_without_reads_directly_classified = TRUE),
+    expected = c(543,562)
+  )
+  # exluding children without reads directly classified works noninclusive
+  expect_equal(
+    object = kraken_report_get_child_taxids(testkreport_path, 543, inclusive = FALSE, exclude_children_without_reads_directly_classified = TRUE),
+    expected = c(562)
+  )
 })

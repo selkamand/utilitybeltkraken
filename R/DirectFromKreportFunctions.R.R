@@ -11,11 +11,12 @@
 #' @return taxids that the kraken report says are children of the user-supplied taxid (int)
 #' @export
 #'
-kraken_report_get_child_taxids <- function(path_to_kraken_report, taxid, inclusive = FALSE){
+kraken_report_get_child_taxids <- function(path_to_kraken_report, taxid, inclusive = FALSE, exclude_children_without_reads_directly_classified = FALSE){
 
   assertthat::assert_that(assertthat::is.flag(inclusive))
 
   kraken_report_df = kraken_report_parse(path_to_kraken_report, verbose = FALSE)
+
   row_containing_taxid = match(taxid, kraken_report_df[["TaxonomyID"]])
 
   #If taxid isnt in kraken report
@@ -44,11 +45,17 @@ kraken_report_get_child_taxids <- function(path_to_kraken_report, taxid, inclusi
       stop("Couldn't find any descendants of taxid [", taxid, "]")
   }
 
+  true_child_taxids = child_taxids[-1]
   # If we find any child taxids we return them (and optionally also the parent taxid if `inclusive` flag is set)
+  #browser()
+  if (exclude_children_without_reads_directly_classified){
+    true_child_taxids <- true_child_taxids[true_child_taxids %in% kraken_report_df[ReadsDirectlyAssigned>0,"TaxonomyID"][["TaxonomyID"]]]
+  }
+
   if(inclusive)
-    return(child_taxids)
+    return(c(taxid, true_child_taxids))
   else
-    return(child_taxids[-1])
+    return(true_child_taxids)
 }
 
 
