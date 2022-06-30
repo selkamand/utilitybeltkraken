@@ -48,15 +48,27 @@ expect_warning(
    object = kraken_report_get_child_taxids(testkreport_path, 562, inclusive = FALSE)
   )
 
-  # [first_taxid_in_report] If taxid supplied has no children in kreport, throws error if inclusive=FALSE
+  # [first_taxid_in_report] works as expected (inclusive)
   expect_equal(
     object = kraken_report_get_child_taxids(testkreport_path, 1, inclusive = TRUE),
     expected = c(1, 131567, 2, 1224, 1236, 72274, 135621, 286, 136841, 287, 91347, 543, 561, 562)
   )
 
-  # [first_taxid_in_report] If taxid supplied has no children in kreport, throws error if inclusive=FALSE
+  # [first_taxid_in_report] works as expected (not inclusive)
   expect_equal(
     object = kraken_report_get_child_taxids(testkreport_path, 1, inclusive = FALSE),
     expected = c(131567, 2, 1224, 1236, 72274, 135621, 286, 136841, 287, 91347, 543, 561, 562)
+  )
+
+  # [first_taxid_in_report] works as expected (not inclusive)
+  expect_equal(
+    object = kraken_report_get_child_taxids(testkreport_path, 1236, inclusive = FALSE),
+    expected = c(72274, 135621, 286, 136841, 287, 91347, 543, 561, 562)
+  )
+
+  # [first_taxid_in_report] works as expected (inclusive)
+  expect_equal(
+    object = kraken_report_get_child_taxids(testkreport_path, 1236, inclusive = TRUE),
+    expected = c(1236, 72274, 135621, 286, 136841, 287, 91347, 543, 561, 562)
   )
 })
