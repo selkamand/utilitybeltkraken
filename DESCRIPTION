@@ -35,7 +35,8 @@ Imports:
     tidyr,
     utilitybeltgg
 Remotes: 
-    selkamand/ncbitaxids
+    selkamand/ncbitaxids,
+    selkamand/utilitybeltgg
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
