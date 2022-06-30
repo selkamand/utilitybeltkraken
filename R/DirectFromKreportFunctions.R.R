@@ -15,7 +15,7 @@ kraken_report_get_child_taxids <- function(path_to_kraken_report, taxid, inclusi
 
   assertthat::assert_that(assertthat::is.flag(inclusive))
 
-  kraken_report_df = kraken_report_parse(testkreport_path, verbose = FALSE)
+  kraken_report_df = kraken_report_parse(path_to_kraken_report, verbose = FALSE)
   row_containing_taxid = match(taxid, kraken_report_df[["TaxonomyID"]])
 
   #If taxid isnt in kraken report

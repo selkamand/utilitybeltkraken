@@ -1,5 +1,6 @@
 test_that("kraken_report_get_child_taxids works", {
-  testkreport_path = system.file(package = "utilitybeltkraken", "testfiles/DRR002014_1.100sequences.minikraken8GB.kreport")
+
+  testkreport_path <- system.file(package = "utilitybeltkraken", "testfiles/DRR002014_1.100sequences.minikraken8GB.kreport")
 
   # Expect function to run without error
   expect_error(
