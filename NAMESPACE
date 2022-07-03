@@ -2,6 +2,8 @@
 
 export("%>%")
 export(kraken_calculate_proportion_of_signal_explained_by_n_strongest_taxids)
+export(kraken_database_close_connection)
+export(kraken_database_connect)
 export(kraken_info_standardised_metrics)
 export(kraken_info_taxids_of_interest)
 export(kraken_report_add_descendancy_status)

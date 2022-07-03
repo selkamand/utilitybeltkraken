@@ -112,3 +112,40 @@ kraken_reports_parse_to_sqlite_db <- function(krakenreport_directory, ...){
 }
 
 
+#' Connect to Kraken Database
+#'
+#' @param path_to_sqlite_db path to sqlite db file produced by [kraken_reports_parse_to_sqlite_db()]
+#'
+#' @return dbplyr object
+#' @export
+#'
+kraken_database_connect <- function(path_to_sqlite_db){
+  assertthat::assert_that(file.exists(path_to_sqlite_db), msg = paste0("Cant find database file at [", path_to_sqlite_db,"]"))
+  connection <- DBI::dbConnect(RSQLite::SQLite(), path_to_sqlite_db)
+  kreports_db <- dplyr::tbl(connection, "kreports")
+  return(kreports_db)
+}
+
+#' Disconnect from Kraken Database
+#'
+#' @param kreports_db object produced by [kraken_database_connect()]
+#'
+#' @return run for its side effects
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # open connection to database
+#' kreports_db = kraken_database_connect("path_to_database")
+#'
+#' # do required visualisations/analyses
+#'
+#' # close connection when done
+#' kraken_database_close_connection(kreports_db)
+#' }
+kraken_database_close_connection <- function(kreports_db){
+  connnection=kreports_db[["src"]][["con"]]
+  DBI::dbDisconnect(connnection)
+}
+
+

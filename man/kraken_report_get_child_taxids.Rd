@@ -4,7 +4,12 @@
 \alias{kraken_report_get_child_taxids}
 \title{Get Child Taxids}
 \usage{
-kraken_report_get_child_taxids(path_to_kraken_report, taxid, inclusive = FALSE)
+kraken_report_get_child_taxids(
+  path_to_kraken_report,
+  taxid,
+  inclusive = FALSE,
+  exclude_children_without_reads_directly_classified = FALSE
+)
 }
 \arguments{
 \item{path_to_kraken_report}{path to kraken report file.}

@@ -251,6 +251,10 @@ kraken_report_visualise_two_group_comparision <- function(kraken_report_df, taxo
 }
 
 
+kraken_report_umap <- function(kraken_report_df){
+
+}
+
 kraken_report_tsne <- function(kraken_report_df){
   #assertthat::assert_that("ZscoreRobust" %in% colnames(kraken_report_df), msg = "Report dataframe must include the column [ZscoreRobustLoggable]")
   assertthat::assert_that("ZscoreRobust" %in% colnames(kraken_report_df), msg = "Report dataframe must include the column [ZscoreRobustLoggable]")
