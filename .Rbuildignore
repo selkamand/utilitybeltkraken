@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 ^inst/nobuild$
 ^LICENSE\.md$
+^README\.Rmd$
