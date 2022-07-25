@@ -6,3 +6,4 @@
 TestingGrounds.R
 inst
 kraken_report_database.sqlite
+inst/doc

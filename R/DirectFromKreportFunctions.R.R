@@ -59,4 +59,3 @@ kraken_report_get_child_taxids <- function(path_to_kraken_report, taxid, inclusi
 }
 
 
-

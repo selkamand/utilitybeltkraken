@@ -1,0 +1,82 @@
+---
+title: "Analysing Cohort Data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Analysing Cohort Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+[Kraken2](https://ccb.jhu.edu/software/kraken2/) is an extremely fast taxonomic sequence classification system that lets you take DNA sequences and classify each against a custom database (usually composed of microbial DNA).
+
+Once this classification has been run on multiple samples you need some way of analysing the results at the cohort level. This package attempts to simplify that process.
+
+## Common Cohort Study Design
+
+-   Microbiome analysis. Run Kraken2 on many samples. Goal is to see how microbiome changes between different groups.
+
+-   Pathogen Screening. Run Kraken2 on many samples and detect samples with unexpectedly high support for some specific pathogen
+
+# Step 1: Setup
+
+## Run Kraken2 and Prepare Inputs
+
+Before leveraging this package, run kraken2 on each of your samples, making sure to use the `--report` option to output kraken reports.
+
+**Naming Style**:
+
+-   Make sure your kraken reports start with a sample name. This package assumes everything before the first **.** is the sample name. (e.g. '<sample_name>.<everythinghereisignored>.kreport')
+
+**For Cohort Analysis:**
+
+-   Move all kraken reports to a single directory
+
+-   There should be only one kreport per sample
+
+## Install dependencies
+
+```{r eval=FALSE}
+# install.packages("remotes")
+remotes::install_github("selkamand/utilitybeltkraken")
+```
+
+## Load libraries
+
+```{r}
+library(utilitybeltkraken)
+```
+
+# Step 2: Read data
+
+`utilitybeltkraken` works by first reading a directory full of kraken reports into memory, running some basic computations, and writing the new data to an `SQLite ` database indexed to allow rapid analysis and visualization. 
+
+This is the longest step, and requires the most memory (but you only need to run once for a dataset). Currently, you must have sufficient RAM to fit all kraken report data into memory to succesfully run this step. This is in some ways unavoidable since we use information from the whole cohort to compute **Robust Z scores**. You'll learn more about these metrics later.
+
+
+## Create Kraken Report Database (Skip if you've already got a database to connect to!)
+
+You only need to run this the first time you analyse a dataset
+```{r, eval="FALSE"}
+kreport_database_path <- kraken_reports_parse_to_sqlite_db(
+  krakenreport_directory = "",
+  database_name = "./my_kraken_database.sqlite"
+  )
+```
+
+
+## Connect to a kraken report database
+
+```{r}
+utilitybeltkraken::kraken_database_connect(kreport_database_path)
+```
+
+
