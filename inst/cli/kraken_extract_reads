@@ -40,7 +40,7 @@ arguments[["taxid"]] <- as.numeric(arguments[["taxid"]])
 arguments[["--threads"]] <- as.numeric(arguments[["--threads"]])
 arguments[["--taxid"]] <- as.numeric(arguments[["--taxid"]])
 
-print(arguments)
+#print(arguments)
 
 kraken_extract_reads(
   kreport_path = arguments[["kreport_path"]],
