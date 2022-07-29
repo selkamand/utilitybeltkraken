@@ -7,7 +7,7 @@
 #' @param path_to_kraken_report path to kraken report file.
 #' @param taxid taxonomy ID of species you want to find  the relatives of (int)
 #' @param inclusive should we include the user-specified taxid in the result (flag)
-#'
+#' @param exclude_children_without_reads_directly_classified in the list of child taxids returned - should we only return taxids that have at least 1 read directly classifed, or return all child taxids irrespective of read counts.
 #' @return taxids that the kraken report says are children of the user-supplied taxid (int)
 #' @export
 #'

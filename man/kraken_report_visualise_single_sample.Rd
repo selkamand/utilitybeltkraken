@@ -23,6 +23,8 @@ kraken_report_visualise_single_sample(
 \item{taxonomy_id_to_highlight}{taxonomy id to highlight (int)}
 
 \item{supporting_reads_threshold}{taxons with greater than this number of reads will be indicated using the color aesthetic (int)}
+
+\item{type_of_taxids_to_show}{one of c("all", "bacterial", "viral", "fungal", "sar")}
 }
 \value{
 ggplot object

@@ -1,8 +1,17 @@
-
-#' Visualise Distribution
+#' Kraken Report Visualise Distributions
 #'
 #' @inheritParams kraken_report_add_zscore
-#' @param taxids_of_interest taxonomy ids to show as distinct facets
+#' @param taxids_of_interest taxonomy ids to show as distinct facets (numeric)
+#' @param y_aesthetic variable representing y axis. Typically "ScientificName".
+#' @param metric Name of metric to use: c("Zscore", "ZscoreRobust", "MedianIQR", "MedianQn", "MedianTau2"). Note depending on how reports have been parsed, you may only have access to ZscoreRobust - which is the recommended choice (string)
+#' @param show_y_axis_labels show y axis labels? (boolean)
+#' @param show_sample_vlines show vertical lines indicating positions of samples of interest (boolean)
+#' @param supporting_reads_threshold minimum number of reads that must be assigned to a taxid for us to be confident its unlikely to be noise (int)
+#' @param sample_of_interest which samples are we most interested in - use show_sample_vlines flag to mark these samples (bool)
+#' @param use_loggable_version should we use the loggable version of the metric.
+#' @param seed random seed.
+#' @param pointsize how large should the points be
+#' @param ... other aesthetics passed to aes_string. Mostly used to show more properties in hoverbox once plots are made interactive
 #'
 #' @return ggplot
 #' @export
@@ -46,7 +55,7 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
   scientific_names = subset_df$ScientificName[match(taxids_of_interest, subset_df$TaxonomyID)]
   #browser()
   subset_df <- subset_df %>%
-    mutate(ScientificName = forcats::fct_relevel(ScientificName, scientific_names))
+    dplyr::mutate(ScientificName = forcats::fct_relevel(ScientificName, scientific_names))
 
 
   set.seed(seed)
@@ -125,6 +134,7 @@ kraken_report_visualise_signal_focus <- function(kraken_report_df, parent_taxids
 #' @param samples_of_interest Sample IDs whose kraken report you want to visualise (character)
 #' @param taxonomy_id_to_highlight taxonomy id to highlight (int)
 #' @param supporting_reads_threshold taxons with greater than this number of reads will be indicated using the color aesthetic (int)
+#' @param type_of_taxids_to_show one of c("all", "bacterial", "viral", "fungal", "sar")
 #' @inheritParams kraken_calculate_proportion_of_signal_explained_by_n_strongest_taxids
 #'
 #' @return ggplot object
@@ -218,10 +228,8 @@ kraken_report_visualise_single_sample <- function(kraken_report_df, samples_of_i
 
 #' Interactive Single Sample Visualisation
 #'
-#'
-#'
+#' @param tooltip aesthetics to include in tooltip c("ScientificName", "TaxonomyID", "ReadsCoveredByClade", "ZscoreRobust", "RPM")
 #' @param ... arguments passed to \strong{kraken_report_visualise_single_sample}
-#'
 #' @return plotly graph
 #' @export
 #'

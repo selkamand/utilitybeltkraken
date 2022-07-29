@@ -27,17 +27,19 @@ kraken_extract_reads(
 
 \item{outfile_prefix}{outfile prefix (string)}
 
-\item{taxid}{Taxonomy ID of reads to extract from input seqs}
+\item{taxid}{Taxonomy ID of reads to extract from input seqs (numeric)}
 
-\item{include_children}{include children of supplied taxid}
+\item{include_children}{include children of supplied taxid (boolean)}
 
 \item{threads}{number of threads to use (string)}
+
+\item{compress_output_seqfile}{should output sequence files be gzipped? (flag)}
 }
 \value{
 invisibly returns paths to fastq/fasta sequences classifed as \strong{taxid} and (optionally) child taxids if \strong{include_children = TRUE}. (character)
 }
 \description{
-Extract Reads
+Extract reads from a fastq/fasta that kraken has classified as belonging to some species + optionally children.
 }
 \examples{
 \dontrun{

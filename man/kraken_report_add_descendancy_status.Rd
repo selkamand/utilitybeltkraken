@@ -20,6 +20,8 @@ kraken_report_add_descendancy_status(
 \item{columname}{name of the column to add to the dataframe}
 
 \item{careful}{should we do a bunch of quality assertions (slight speed overhead) (flag)}
+
+\item{verbose}{print more informative messages}
 }
 \value{
 This function returns the same dataframe from \strong{kraken_report_df} produced by \link{kraken_reports_parse} or link{kraken_report_parse}  but with  a new columns describing inclusive descendancey status to a particular taxid

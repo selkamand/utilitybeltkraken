@@ -1,10 +1,11 @@
 
-
 #' Convert Kraken Report Dataframe to sqlite database
 #'
-#' @inherit kraken_report_add_descendancy_status
+#'
 #' @param database_name (If unsure leave defaults) name of sqlite database to create.
 #' @param table_name (If unsure leave defaults) name of kraken report dataframe table in sqlite database
+#' @param kraken_report_df dataframe from [utilitybeltkraken::kraken_reports_parse()]
+#' @param overwrite overwrite existing database? (boolean)
 #'
 #' @return Name of the Database Created (string). Primarily Run for its side effects
 #' @export
@@ -74,18 +75,20 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
 
   DBI::dbDisconnect(kreport_sqlite_db)
 
-  message("All Finished!
+  message(
+    "All Finished!
 
-          Database files can be found at: ",
-          message(tools::file_path_as_absolute(database_name))
-          ,"\n
+    Database files can be found at: ",
+    tools::file_path_as_absolute(database_name)
+    ,"\n
 
-          Connect to the database using the following code snippet:
-          DBI::dbConnect(
-            RSQLite::SQLite(),
-            '",database_name,"'
-          )"
-          )
+    Connect to the database using the following code snippet:
+     kraken_db <- utilitybeltkraken::kraken_database_connect('",database_name,"')
+
+    When You're finished using the database, close the connection:
+    utilitybeltkraken::kraken_database_close_connection(kraken_db)
+    "
+  )
   return(database_name)
 }
 
@@ -101,9 +104,9 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
 #' @return database name
 #' @export
 #'
-kraken_reports_parse_to_sqlite_db <- function(krakenreport_directory, ...){
+kraken_reports_parse_to_sqlite_db <- function(kraken2directory, ...){
   message("Parsing kraken reports")
-  kraken_df <- kraken_reports_parse(krakenreport_directory)
+  kraken_df <- kraken_reports_parse(kraken2directory)
   kraken_report_add_robust_zscore(kraken_df)
 
   message("Starting Conversion to sqlite database")

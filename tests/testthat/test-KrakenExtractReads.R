@@ -1,9 +1,18 @@
 # kraken_extract_reads ----------------------------------------------------
 test_that("kraken_extract_reads works", {
+
+  # Toggle whether to run tests pertaining to kraken_extract_reads.
+  # I often disable these tests when developing new ones since running this particular set takes a while
+  skip_tests=FALSE
+  if(skip_tests) { message("\nSkipping kraken_extract_reads tests"); return(TRUE)}
+
+
+
   # Setup options for maximum reproducibility
   withr::local_options(.new = list(crayon.enabled = FALSE, cli.unicode = FALSE, width = 80))
 
   # Make a temporary_directory in which to store test ouptuts that will be deleted after test
+  self_deleting_tempdir0 = withr::local_tempdir(pattern = "kraken_extract_reads")
   self_deleting_tempdir = withr::local_tempdir(pattern = "kraken_extract_reads")
   self_deleting_tempdir2 = withr::local_tempdir(pattern = "kraken_extract_reads")
   self_deleting_tempdir3 = withr::local_tempdir(pattern = "kraken_extract_reads")
@@ -18,6 +27,7 @@ test_that("kraken_extract_reads works", {
   kraken_input_seqs_invalid = "aajksdlajdlksajkldjawkljdakljwaadlkwjadwawddsalkfdsjkflenjcne"
   kraken_input_seqs_fastq_gzip = system.file(package="utilitybeltkraken", "testfiles/e_coli_l_monocytogones_s_enterica_50seqs_each.fastq.gz")
 
+  sequence_outfile_prefix0 = paste0(self_deleting_tempdir0,"/", "kraken_extract_reads")
   sequence_outfile_prefix = paste0(self_deleting_tempdir,"/", "kraken_extract_reads")
   sequence_outfile_prefix2 = paste0(self_deleting_tempdir2,"/", "kraken_extract_reads")
   sequence_outfile_prefix3 = paste0(self_deleting_tempdir3,"/", "kraken_extract_reads")
@@ -26,8 +36,34 @@ test_that("kraken_extract_reads works", {
   sequence_outfile_prefix6 = paste0(self_deleting_tempdir6,"/", "kraken_extract_reads")
 
 
+
+  # Only run full test suite if all dependencies are present ---------------------------------------
+  # We only want to test read extraction on systems with the relevent dependencies:
+  # (seqkit, parallel, and awk) otherwise all results will throw the 'can't find dependencies error'
+  dependencies = c("awk", "parallel", "seqkit")
+  if(!all(dependencies_present(dependencies))){
+
+    #browser()
+    expect_error(
+      kraken_extract_reads(
+        kreport_path = kreport_path,
+        kraken_input_seqs = kraken_input_seqs_fasta,
+        outfile_prefix = sequence_outfile_prefix,
+        compress_output_seqfile = TRUE,
+        taxid = 561,
+        include_children = TRUE,
+        kraken_stdout_path = kraken_stdout_path
+      ),
+      "Missing Dependencies"
+      ) |> suppressMessages()
+
+    message("\nSince dependencies for kraken_extract_reads [",paste0(dependencies[!dependencies_present(dependencies)], collapse = ", "),"] are missing we'll make sure that the functions throws the missing dependency error but skip the rest of the tests, since they'll all throw the same error")
+    return(TRUE)
+  }
+
   ## Unpaired Fasta Input ----------------------------------------------------
   # Runs without error
+  #browser()
   expect_error(
     kraken_extract_reads(
       kreport_path = kreport_path,
@@ -37,9 +73,9 @@ test_that("kraken_extract_reads works", {
       taxid = 561,
       include_children = TRUE,
       kraken_stdout_path = kraken_stdout_path
-    ) |> suppressMessages(),
+    ),
     NA
-  )
+  ) |> suppressMessages()
 
   # Produces Expected Files
   expected_outseq_path = paste0(sequence_outfile_prefix, ".reads_classified_as_taxid561_or_children.unpaired.1.fasta.gz")
@@ -260,7 +296,7 @@ test_that("kraken_extract_reads works", {
       threads = 1
     ),
     "length of kraken_input_seqs [2] should match kraken_input_seqs2 [1]", fixed=TRUE
-  )
+  ) |> suppressMessages()
 
   # Expect error if more than one forward and reverse seqfiles are provided
   expect_error(
@@ -276,7 +312,7 @@ test_that("kraken_extract_reads works", {
       threads = 1
     ),
     "Too many kraken_input_sequences", fixed=TRUE
-  )
+  ) |> suppressMessages()
 
   expect_error(
     kraken_extract_reads(

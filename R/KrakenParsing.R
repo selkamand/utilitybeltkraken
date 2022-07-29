@@ -1,8 +1,9 @@
 
 #' Parse Kraken Reports
 #'
-#' @param path_to_kreport path to kraken report
+#' @param path_to_kreport path to kraken report (string)
 #' @param sample_id  sample identifier. By default will guess from the filename (takes everything before the first '.' as sample name)
+#' @param verbose print more informative messages (boolean)
 #'
 #' @return a dataframe describing all samples kraken reports
 #' @export
@@ -39,8 +40,8 @@ kraken_report_parse <- function(path_to_kreport, sample_id = NULL, verbose = TRU
   }
 
   # Calculate RPM (reads covered by clade per million total reads
-  kraken_reports_df[, `:=`(total_reads_in_sample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
-  kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade * 1e+06/total_reads_in_sample)]
+  kraken_reports_df[, `:=`(TotalReadsInSample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
+  kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade * 1e+06/TotalReadsInSample)]
 
   return(kraken_reports_df)
 }
@@ -86,8 +87,8 @@ kraken_reports_parse <- function(kraken2directory){
   assertthat::assert_that(n_files == n_samples, msg = paste0("The number of files [", n_files ,"] is not the same as the number of distinct sample IDs [", n_samples,"].  Sample IDs are extrapolated from filenames, so please ensure files are named appropriately (i.e. filenames start with a unique sampleID, where the end of the sampleID is indicated by a period. e.g. `sample1.kreport`)"))
 
   # Calculate RPM (reads covered by clade per million total reads
-  kraken_reports_df[, `:=`(total_reads_in_sample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
-  kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade * 1e+06/total_reads_in_sample)]
+  kraken_reports_df[, `:=`(TotalReadsInSample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
+  kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade * 1e+06/TotalReadsInSample)]
 
   return(kraken_reports_df)
 }
@@ -104,6 +105,7 @@ kraken_reports_parse <- function(kraken2directory){
 #' @param careful should we do a bunch of quality assertions (slight speed overhead) (flag)
 #' @param columname name of the column to add to the dataframe
 #'
+#' @param verbose print more informative messages
 #'
 #' @return This function returns the same dataframe from \strong{kraken_report_df} produced by \link{kraken_reports_parse} or link{kraken_report_parse}  but with  a new columns describing inclusive descendancey status to a particular taxid
 #' @export

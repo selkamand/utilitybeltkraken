@@ -7,9 +7,11 @@
 kraken_report_parse(path_to_kreport, sample_id = NULL, verbose = TRUE)
 }
 \arguments{
-\item{path_to_kreport}{path to kraken report}
+\item{path_to_kreport}{path to kraken report (string)}
 
 \item{sample_id}{sample identifier. By default will guess from the filename (takes everything before the first '.' as sample name)}
+
+\item{verbose}{print more informative messages (boolean)}
 }
 \value{
 a dataframe describing all samples kraken reports

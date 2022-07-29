@@ -65,18 +65,39 @@ This is the longest step, and requires the most memory (but you only need to run
 ## Create Kraken Report Database (Skip if you've already got a database to connect to!)
 
 You only need to run this the first time you analyse a dataset
-```{r, eval="FALSE"}
-kreport_database_path <- kraken_reports_parse_to_sqlite_db(
-  krakenreport_directory = "",
-  database_name = "./my_kraken_database.sqlite"
-  )
+```{r}
+krakenreport_directory <- system.file(package="utilitybeltkraken", "simulated_data/simulated_kraken_stdout_inc_zero_counts")
+
+# kreport_database_path <- kraken_reports_parse_to_sqlite_db(
+#   krakenreport_directory = krakenreport_directory,
+#   database_name = "./my_kraken_database.sqlite"
+#   )
 ```
 
 
 ## Connect to a kraken report database
 
 ```{r}
-utilitybeltkraken::kraken_database_connect(kreport_database_path)
+# kraken_db <- kraken_database_connect(kreport_database_path)
 ```
 
+
+# Step 3: Explore Data
+
+```{r}
+# kraken_report_visualise_distributions(
+#   kraken_report_df = kraken_db,
+#   taxids_of_interest = c(562, 1639), use_loggable_version = FALSE
+#   )
+```
+
+
+
+# Disconnect from db
+
+Once you're all finished with your analysis, run the following snippet to disconnect from the database
+
+```{r}
+# kraken_database_close_connection(kraken_db)
+```
 

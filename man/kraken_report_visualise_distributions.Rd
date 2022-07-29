@@ -2,7 +2,7 @@
 % Please edit documentation in R/KrakenVisualise.R
 \name{kraken_report_visualise_distributions}
 \alias{kraken_report_visualise_distributions}
-\title{Visualise Distribution}
+\title{Kraken Report Visualise Distributions}
 \usage{
 kraken_report_visualise_distributions(
   kraken_report_df,
@@ -22,11 +22,31 @@ kraken_report_visualise_distributions(
 \arguments{
 \item{kraken_report_df}{the kraken dataframe produced by \link{kraken_reports_parse} or link{kraken_report_parse}}
 
-\item{taxids_of_interest}{taxonomy ids to show as distinct facets}
+\item{taxids_of_interest}{taxonomy ids to show as distinct facets (numeric)}
+
+\item{y_aesthetic}{variable representing y axis. Typically "ScientificName".}
+
+\item{metric}{Name of metric to use: c("Zscore", "ZscoreRobust", "MedianIQR", "MedianQn", "MedianTau2"). Note depending on how reports have been parsed, you may only have access to ZscoreRobust - which is the recommended choice (string)}
+
+\item{show_y_axis_labels}{show y axis labels? (boolean)}
+
+\item{show_sample_vlines}{show vertical lines indicating positions of samples of interest (boolean)}
+
+\item{supporting_reads_threshold}{minimum number of reads that must be assigned to a taxid for us to be confident its unlikely to be noise (int)}
+
+\item{sample_of_interest}{which samples are we most interested in - use show_sample_vlines flag to mark these samples (bool)}
+
+\item{use_loggable_version}{should we use the loggable version of the metric.}
+
+\item{seed}{random seed.}
+
+\item{pointsize}{how large should the points be}
+
+\item{...}{other aesthetics passed to aes_string. Mostly used to show more properties in hoverbox once plots are made interactive}
 }
 \value{
 ggplot
 }
 \description{
-Visualise Distribution
+Kraken Report Visualise Distributions
 }

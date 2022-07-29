@@ -11,6 +11,8 @@ kraken_report_visualise_single_sample_interactive(
 )
 }
 \arguments{
+\item{tooltip}{aesthetics to include in tooltip c("ScientificName", "TaxonomyID", "ReadsCoveredByClade", "ZscoreRobust", "RPM")}
+
 \item{...}{arguments passed to \strong{kraken_report_visualise_single_sample}}
 }
 \value{

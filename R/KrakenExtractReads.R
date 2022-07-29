@@ -1,13 +1,16 @@
 #' Extract Reads
 #'
+#' Extract reads from a fastq/fasta that kraken has classified as belonging to some species + optionally children.
+#'
 #' @param kreport_path path to kraken report (string)
-#' @param taxid Taxonomy ID of reads to extract from input seqs
-#' @param include_children include children of supplied taxid
+#' @param taxid Taxonomy ID of reads to extract from input seqs (numeric)
+#' @param include_children include children of supplied taxid (boolean)
 #' @param kraken_stdout_path path to stdout (string)
 #' @param kraken_input_seqs path to fasta/fastq (optionally compressed) files that were the inputs for the kraken. If input was paired-end sequences, include only paths to forward reads here. Supply any reverse reads to kraken_input_seqs2 (character)
 #' @param kraken_input_seqs2  path to reverse reads. Leave null if input was unpaired (character)
 #' @param outfile_prefix outfile prefix (string)
 #' @param threads number of threads to use (string)
+#' @param compress_output_seqfile should output sequence files be gzipped? (flag)
 #'
 #' @return invisibly returns paths to fastq/fasta sequences classifed as \strong{taxid} and (optionally) child taxids if \strong{include_children = TRUE}. (character)
 #' @export
@@ -159,16 +162,7 @@ kraken_extract_reads <- function(kreport_path, kraken_stdout_path, kraken_input_
 
   ## Check Dependencies ------------------------------------------------------
   cli::cli_h1("Checking Dependencies")
-  program_names <- c("awk", "parallel", "seqkit")
-  program_paths <- Sys.which(program_names)
-  programs_not_found <- program_paths[program_paths==""]
-  names(program_names) <- ifelse(program_paths=="", yes = "x", no = "v")
-  programs_not_found_string <- paste0(names(programs_not_found), collapse = ", ")
-
-  cli::cli_bullets(c("Checking Dependencies: ", program_names))
-  if(any(program_paths == "")){
-    stop(glue::glue("Missing Dependencies: ", paste0(programs_not_found_string, collapse = ",")))
-  }
+  assert_dependencies_present(c("awk", "parallel", "seqkit"))
 
   # Extract Reads by Taxid --------------------------------------------------
   cli::cli_h1("Extract Reads by Taxid")
@@ -262,4 +256,23 @@ kraken_extract_reads <- function(kreport_path, kraken_stdout_path, kraken_input_
 
 
   return(invisible(outfile_sequences))
+}
+
+
+dependencies_present <- function(program_names){
+  program_paths <- Sys.which(program_names)
+  return(!(program_paths==""))
+}
+
+assert_dependencies_present <- function(program_names){
+  #program_names <- c("awk", "parallel", "seqkit")
+
+  names(program_names) <- ifelse(dependencies_present(program_names), no = "x", yes = "v")
+  programs_not_found <- program_names[!dependencies_present(program_names)]
+  programs_not_found_string <- paste0(names(programs_not_found), collapse = ", ")
+
+  cli::cli_bullets(c("Checking Dependencies: ", program_names))
+  if(!all(dependencies_present(program_names))){
+    stop(glue::glue("Missing Dependencies: ", paste0(programs_not_found_string, collapse = ",")))
+  }
 }

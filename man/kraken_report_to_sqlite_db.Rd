@@ -12,17 +12,17 @@ kraken_report_to_sqlite_db(
 )
 }
 \arguments{
-\item{kraken_report_df}{an UNSORTED kraken report dataframe produced by \link{kraken_reports_parse} or link{kraken_report_parse}}
+\item{kraken_report_df}{dataframe from \code{\link[=kraken_reports_parse]{kraken_reports_parse()}}}
 
 \item{database_name}{(If unsure leave defaults) name of sqlite database to create.}
 
 \item{table_name}{(If unsure leave defaults) name of kraken report dataframe table in sqlite database}
+
+\item{overwrite}{overwrite existing database? (boolean)}
 }
 \value{
 Name of the Database Created (string). Primarily Run for its side effects
 }
 \description{
-Identify taxids in your \strong{kraken_report_df} that are either equal to the user specified taxonomy ID or one of its descendants/children
-This is seful for telling what species are bacterial / viral / belong to a particular genus etc.
-\strong{WARNING: } this function relies on inherent properties of kraken reports - make sure you run this ONLY on unsorted dataframes produced by \link{kraken_reports_parse} or link{kraken_report_parse}
+Convert Kraken Report Dataframe to sqlite database
 }

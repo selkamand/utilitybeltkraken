@@ -4,15 +4,18 @@
 \alias{kraken_reports_parse_to_sqlite_db}
 \title{kraken_reports_parse_to_sqlite_db}
 \usage{
-kraken_reports_parse_to_sqlite_db(krakenreport_directory, ...)
+kraken_reports_parse_to_sqlite_db(kraken2directory, ...)
 }
 \arguments{
+\item{kraken2directory}{path to a directory filled with ONLY kraken2 reports}
+
 \item{...}{
   Arguments passed on to \code{\link[=kraken_report_to_sqlite_db]{kraken_report_to_sqlite_db}}
   \describe{
     \item{\code{database_name}}{(If unsure leave defaults) name of sqlite database to create.}
     \item{\code{table_name}}{(If unsure leave defaults) name of kraken report dataframe table in sqlite database}
-    \item{\code{kraken_report_df}}{an UNSORTED kraken report dataframe produced by \link{kraken_reports_parse} or link{kraken_report_parse}}
+    \item{\code{kraken_report_df}}{dataframe from \code{\link[=kraken_reports_parse]{kraken_reports_parse()}}}
+    \item{\code{overwrite}}{overwrite existing database? (boolean)}
   }}
 }
 \value{
