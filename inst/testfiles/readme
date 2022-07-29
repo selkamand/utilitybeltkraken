@@ -1,0 +1,24 @@
+Testing Data:
+
+Escherichia Coli: Paired Illumina WGS data DRR002013 downloaded from the ENA
+https://www.ebi.ac.uk/ena/browser/view/DRR002013?show=reads
+> DRR002014_1.fastq.gz
+> DRR002014_2.fastq.gz
+
+Should be purely bacterial
+
+Took top 100 sequences to make them easier to work with
+
+```
+gzip -dc  DRR002014_2.fastq.gz | head -n 400 | gzip > DRR002014_2.100sequences.fastq.gz
+gzip -dc  DRR002014_1.fastq.gz | head -n 400 | gzip > DRR002014_1.100sequences.fastq.gz
+```
+
+Then ran kraken against minikraken database
+```
+kraken2 --paired --output DRR002014_1.100sequences.minikraken8GB.stdout.tsv  --report DRR002014_1.100sequences.minikraken8GB.kreport -db ~/databases/kraken/minikraken2_v2_8GB_201904_UPDATE DRR002014_1.100sequences.fastq.gz DRR002014_2.100sequences.fastq.gz
+```
+
+Result shows:
+> 65 reads were classified as 543 (Enterobacteriaceae (family))
+> 24 reads classified as 562 (E. coli)

@@ -1,0 +1,55 @@
+#!/usr/local/bin/Rscript
+
+# make_argument_numeric <- function(argument_list, numeric_argument_names){
+#   for (numeric_arg in seq_along(numeric_argument_names)){
+#     print(numeric_arg)
+#     argument_list[[numeric_arg]] <- as.numeric(argument_list[[numeric_arg]] )
+#   }
+#
+#   return(argument_list)
+# }
+
+'
+
+kraken_extract_reads: extract reads from fastq/fasta file based on whether kraken classified it as some taxid (optionally also includes those classified as child taxids)
+
+Usage:
+  kraken_extract_reads --kreport_path=<kreport> --kraken_stdout_path=<stdout.tsv> --kraken_input_seqs=<forward.fq/fa> --kraken_input_seqs2  =<reverse.fq/fa> --taxid=<arg> [--include_children] --outfile_prefix=<arg> [--threads=<arg>] [--compress_output_seqfile]
+  kraken_extract_reads --kreport_path=<kreport> --kraken_stdout_path=<stdout.tsv> --kraken_input_seqs=<forward.fq/fa> --taxid=<arg> [--include_children] --outfile_prefix=<arg> [--threads=<arg>] [--compress_output_seqfile]
+
+Options:
+  --kreport_path=<kreport>  path to kraken report (string)
+  --taxid=<arg>  Taxonomy ID of reads to extract from input seqs
+  --include_children  include children of supplied taxid
+  --kraken_stdout_path=<stdout.tsv>  path to stdout (string)
+  --kraken_input_seqs=<forward.fq/fa>  path to fasta/fastq (optionally compressed) files that were the inputs for the kraken. If input was paired-end sequences, include only paths to forward reads here. Supply any reverse reads to kraken_input_seqs2 (character)
+  --kraken_input_seqs2=<forward.fq/fa>  path to reverse reads. Leave null if input was unpaired (character)
+  --outfile_prefix=<arg>  outfile prefix (string)
+  --threads=<arg>  number of threads to use (string) [default: 1]
+  --compress_output_seqfile  should output sequence files be gzipped? (flag)
+' -> doc
+
+
+library(docopt)
+library(utilitybeltkraken)
+
+arguments <- docopt(doc)
+
+arguments[["threads"]] <- as.numeric(arguments[["threads"]])
+arguments[["taxid"]] <- as.numeric(arguments[["taxid"]])
+arguments[["--threads"]] <- as.numeric(arguments[["--threads"]])
+arguments[["--taxid"]] <- as.numeric(arguments[["--taxid"]])
+
+print(arguments)
+
+kraken_extract_reads(
+  kreport_path = arguments[["kreport_path"]],
+  kraken_stdout_path = arguments[["kraken_stdout_path"]],
+  kraken_input_seqs = arguments[["kraken_input_seqs"]],
+  kraken_input_seqs2 = arguments[["kraken_input_seqs2"]],
+  taxid = arguments[["taxid"]],
+  include_children = arguments[["include_children"]],
+  threads = arguments[["threads"]],
+  outfile_prefix = arguments[["outfile_prefix"]],
+  compress_output_seqfile = arguments[["compress_output_seqfile"]]
+)

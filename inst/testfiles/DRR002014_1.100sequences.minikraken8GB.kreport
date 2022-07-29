@@ -1,0 +1,10 @@
+  6.00	6	6	U	0	unclassified
+ 94.00	94	0	R	1	root
+ 94.00	94	0	R1	131567	  cellular organisms
+ 94.00	94	0	D	2	    Bacteria
+ 94.00	94	0	P	1224	      Proteobacteria
+ 94.00	94	0	C	1236	        Gammaproteobacteria
+ 94.00	94	1	O	91347	          Enterobacterales
+ 93.00	93	65	F	543	            Enterobacteriaceae
+ 28.00	28	4	G	561	              Escherichia
+ 24.00	24	24	S	562	                Escherichia coli

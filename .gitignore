@@ -4,6 +4,6 @@
 .httr-oauth
 .DS_Store
 TestingGrounds.R
-inst
 kraken_report_database.sqlite
 inst/doc
+inst/simulated_data/simulated_kraken_fastq.tar.gz
