@@ -14,7 +14,7 @@
 kraken_extract_reads: extract reads from fastq/fasta file based on whether kraken classified it as some taxid (optionally also includes those classified as child taxids)
 
 Usage:
-  kraken_extract_reads --kreport_path=<kreport> --kraken_stdout_path=<stdout.tsv> --kraken_input_seqs=<forward.fq/fa> --kraken_input_seqs2  =<reverse.fq/fa> --taxid=<arg> [--include_children] --outfile_prefix=<arg> [--threads=<arg>] [--compress_output_seqfile]
+  kraken_extract_reads --kreport_path=<kreport> --kraken_stdout_path=<stdout.tsv> --kraken_input_seqs=<forward.fq/fa> --kraken_input_seqs2=<reverse.fq/fa> --taxid=<arg> [--include_children] --outfile_prefix=<arg> [--threads=<arg>] [--compress_output_seqfile]
   kraken_extract_reads --kreport_path=<kreport> --kraken_stdout_path=<stdout.tsv> --kraken_input_seqs=<forward.fq/fa> --taxid=<arg> [--include_children] --outfile_prefix=<arg> [--threads=<arg>] [--compress_output_seqfile]
 
 Options:
