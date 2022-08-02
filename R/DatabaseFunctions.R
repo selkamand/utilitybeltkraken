@@ -49,29 +49,37 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
     "))
 
 
-  message("Creating TaxonomyID, ScientificName Index:")
-  DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
-    "CREATE INDEX taxonomy_scientific_name_index
-    ON ",table_name," (TaxonomyID, ScientificName);
-    "))
+  # message("Creating TaxonomyID, ScientificName Index:")
+  # DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
+  #   "CREATE INDEX taxonomy_scientific_name_index
+  #   ON ",table_name," (TaxonomyID, ScientificName);
+  #   "))
 
-  message("Creating Rank, Zscore, RPM Index")
+  message("Creating Rank, Zscore, RPM, Reads Index")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE INDEX rank_zscore_rpm
-    ON ",table_name," (Rank, ZscoreRobust, RPM);
+    ON ",table_name," (Rank, ZscoreRobust, RPM, ReadsCoveredByClade);
     "))
 
-  # message("Creating Rank Index")
-  # DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
-  #   "CREATE INDEX rank
-  #   ON ",table_name," (Rank);
-  #   "))
+  message("Creating Rank, Zscore, Reads Index")
+  DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
+  "CREATE INDEX  rank_zscore_reads
+  ON ",table_name," (Rank, ZscoreRobust, ReadsCoveredByClade);
+  "))
+
+
+  message("Creating Rank, Sample")
+  DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
+    "CREATE INDEX  rank_zscore_reads
+  ON ",table_name," (Rank, Sample);
+  "))
 
   # Create Views ----------------------------------------------------------------
   message("Creating TaxonomyID to ScientificName Mapping Views:")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE VIEW species AS
     SELECT DISTINCT(TaxonomyID, ScientificName) FROM ",table_name, ";"))
+
 
   DBI::dbDisconnect(kreport_sqlite_db)
 
