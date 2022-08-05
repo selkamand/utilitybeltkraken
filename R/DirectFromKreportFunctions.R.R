@@ -3,7 +3,6 @@
 #' Get Child Taxids
 #'
 #' Scan a kraken report to find what taxids kraken considered to be the chldren of others
-#'
 #' @param path_to_kraken_report path to kraken report file.
 #' @param taxid taxonomy ID of species you want to find  the relatives of (int)
 #' @param inclusive should we include the user-specified taxid in the result (flag)
