@@ -295,3 +295,19 @@ kraken_report_tsne <- function(kraken_report_df){
   rownames(tsne_input_wide_mx) <- tsne_input_wide_dt$SampleID
   #return(tsne_input_dt)
 }
+
+
+# kraken_report_visualise_single_sample_sunbursts <- function(kraken_report_df, sample_id, rank){
+#   rlang::check_installed("taxizedbextra", reason = "to use `taxizedbextra::taxid2lineage()`")
+#   rlang::check_installed("sunburst", reason = "to use `lineage2sunburst()`")
+#
+#   kraken_report_df |>
+#     dplyr::filter(SampleID == sample_id, Rank == rank) |>
+#      dplyr::collect() |>
+#     dplyr::mutate(lineage = taxizedbextra::taxid2lineage(
+#     ultimate_ancestor = sample_id,
+#     taxids = TaxonomyID,
+#     ranks_to_include =c("genus","species")
+#     )) # taxid2lineage doesnt work here due to kraken taxonomy IDs not necessarily matching the
+#
+# }

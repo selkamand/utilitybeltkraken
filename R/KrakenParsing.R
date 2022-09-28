@@ -90,6 +90,7 @@ kraken_reports_parse <- function(kraken2directory){
   kraken_reports_df[, `:=`(TotalReadsInSample = sum(ReadsDirectlyAssigned)), by = .(SampleID)]
   kraken_reports_df[, `:=`(RPM = ReadsCoveredByClade * 1e+06/TotalReadsInSample)]
 
+
   return(kraken_reports_df)
 }
 

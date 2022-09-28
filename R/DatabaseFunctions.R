@@ -35,18 +35,18 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
 
 
   # Indexing ----------------------------------------------------------------
-  message("Creating SampleID TaxonomyID multicolumn index:")
+  message("Creating SampleID TaxonomyID multicolumn Index")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE INDEX sample_taxonomy_index
     ON ",table_name," (SampleID, TaxonomyID);
     "
-    ))
+    )) |> DBI::dbClearResult()
 
-  message("Creating TaxonomyID SampleID index:")
+  message("Creating TaxonomyID SampleID Index")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE INDEX taxonomy_sample_index
     ON ",table_name," (TaxonomyID, SampleID);
-    "))
+    ")) |> DBI::dbClearResult()
 
 
   # message("Creating TaxonomyID, ScientificName Index:")
@@ -59,26 +59,33 @@ kraken_report_to_sqlite_db = function(kraken_report_df, database_name = paste0(g
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE INDEX rank_zscore_rpm
     ON ",table_name," (Rank, ZscoreRobust, RPM, ReadsCoveredByClade);
-    "))
+    ")) |> DBI::dbClearResult()
 
   message("Creating Rank, Zscore, Reads Index")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
   "CREATE INDEX  rank_zscore_reads
   ON ",table_name," (Rank, ZscoreRobust, ReadsCoveredByClade);
-  "))
+  ")) |> DBI::dbClearResult()
 
 
   message("Creating Rank, Sample")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
-    "CREATE INDEX  rank_zscore_reads
-  ON ",table_name," (Rank, Sample);
-  "))
+    "CREATE INDEX  rank_sample
+  ON ",table_name," (Rank, SampleID);
+  ")) |> DBI::dbClearResult()
+
+  message("Creating Hit Confidence Ranking")
+  DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
+    "CREATE INDEX  confidence
+  ON ",table_name," (Confidence);
+  ")) |> DBI::dbClearResult()
 
   # Create Views ----------------------------------------------------------------
   message("Creating TaxonomyID to ScientificName Mapping Views:")
   DBI::dbSendQuery(conn = kreport_sqlite_db, statement = paste0(
     "CREATE VIEW species AS
-    SELECT DISTINCT(TaxonomyID, ScientificName) FROM ",table_name, ";"))
+    SELECT DISTINCT(TaxonomyID, ScientificName) FROM ",table_name, ";")
+    ) |> DBI::dbClearResult()
 
 
   DBI::dbDisconnect(kreport_sqlite_db)
@@ -116,6 +123,7 @@ kraken_reports_parse_to_sqlite_db <- function(kraken2directory, ...){
   message("Parsing kraken reports")
   kraken_df <- kraken_reports_parse(kraken2directory)
   kraken_report_add_robust_zscore(kraken_df)
+  kraken_report_add_hit_confidence(kraken_df)
 
   message("Starting Conversion to sqlite database")
   dbname = kraken_report_to_sqlite_db(kraken_report_df = kraken_df, ...)

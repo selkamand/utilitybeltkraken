@@ -37,10 +37,15 @@ Imports:
     utilitybeltgg
 Remotes: 
     selkamand/ncbitaxids,
-    selkamand/utilitybeltgg
+    selkamand/utilitybeltgg,
+    selkamand/taxizedbextra,
+    selkamand/sunburst
 Suggests: 
     knitr,
+    progress,
     rmarkdown,
+    sunburst (>= 0.0.0.9000),
+    taxizedbextra (>= 0.0.0.9000),
     testthat (>= 3.0.0),
     withr
 Config/testthat/edition: 3
