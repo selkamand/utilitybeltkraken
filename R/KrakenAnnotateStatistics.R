@@ -150,7 +150,7 @@ kraken_report_add_median_centered_tau2_scaled_metric <- function(kraken_report_d
 #' Stratify Strength of Microbial Hits
 #'
 #' Adds a column to the kraken report df that stratifies each microbe-sample hit confidence into a discrete level.
-#' Levels include 'Extremely High', 'High', 'Medium', 'Weak', 'No Hit'. A confidant hit.
+#' Levels include 'High', 'Medium', 'Low', 'Very Low', 'No Hit'.
 #' Adds column: 'Confidence'
 #'
 #' @inheritParams kraken_report_add_zscore
@@ -165,19 +165,19 @@ kraken_report_add_hit_confidence <- function(kraken_report_df){
 
 kraken_hit_classify_strength <- function(
     robust_zscores, reads_covered_by_clade,
-    zscore_cutoff_extemely_high = 10000, reads_cutoff_extremely_high = 10000,
-    zscore_cutoff_high = 1000, reads_cutoff_high = 1000,
-    zscore_cutoff_medium = 100,reads_cutoff_medium = 1000,
-    zscore_cutoff_weak = 10, reads_cutoff_weak = 100
+    zscore_cutoff_high = 10000, reads_cutoff_high = 10000,
+    zscore_cutoff_medium = 1000, reads_cutoff_medium = 1000,
+    zscore_cutoff_low = 100,reads_cutoff_low = 1000,
+    zscore_cutoff_very_low = 10, reads_cutoff_very_low = 100
   ){
   assertthat::assert_that(is.numeric(robust_zscores))
   assertthat::assert_that(is.numeric(reads_covered_by_clade))
 
   data.table::fcase(
-    robust_zscores > zscore_cutoff_extemely_high & reads_covered_by_clade > reads_cutoff_extremely_high, 'Extremely High',
     robust_zscores > zscore_cutoff_high & reads_covered_by_clade > reads_cutoff_high, 'High',
     robust_zscores > zscore_cutoff_medium & reads_covered_by_clade > reads_cutoff_medium, 'Medium',
-    robust_zscores > zscore_cutoff_weak & reads_covered_by_clade > reads_cutoff_weak, 'Weak',
+    robust_zscores > zscore_cutoff_low & reads_covered_by_clade > reads_cutoff_low, 'Low',
+    robust_zscores > zscore_cutoff_very_low & reads_covered_by_clade > reads_cutoff_very_low, 'Very Low',
     default = "No Hit"
     )
 }

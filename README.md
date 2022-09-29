@@ -21,3 +21,14 @@ You can install the development version of utilitybeltkraken from
 # install.packages("devtools")
 devtools::install_github("selkamand/utilitybeltkraken")
 ```
+
+## Usage
+
+``` r
+# Path to folder containing kraken reports 
+# (reports must be named with sample_id as prefix)
+kreport_dir <- system.file(package="utilitybeltkraken", "simulated_data/simulated_kraken_reports_inc_zero_counts/")
+
+# Create kraken sqlite database
+kraken_db <- kraken_reports_parse_to_sqlite_db(kreport_dir)
+```

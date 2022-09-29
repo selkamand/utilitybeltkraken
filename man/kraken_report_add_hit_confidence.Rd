@@ -14,6 +14,6 @@ invisible null (run for its side effects)
 }
 \description{
 Adds a column to the kraken report df that stratifies each microbe-sample hit confidence into a discrete level.
-Levels include 'Extremely High', 'High', 'Medium', 'Weak', 'No Hit'. A confidant hit.
+Levels include 'High', 'Medium', 'Low', 'Very Low', 'No Hit'.
 Adds column: 'Confidence'
 }
