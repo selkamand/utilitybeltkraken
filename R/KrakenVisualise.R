@@ -16,7 +16,7 @@
 #' @return ggplot
 #' @export
 #'
-kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_interest, y_aesthetic = "ScientificName", metric = "ZscoreRobust", show_y_axis_labels = FALSE,show_sample_vlines = FALSE, supporting_reads_threshold = 50, sample_of_interest = NA, use_loggable_version = TRUE, seed = 1, pointsize = c(1, 2), ...){
+kraken_report_visualise_distributions_old <- function(kraken_report_df, taxids_of_interest, y_aesthetic = "ScientificName", metric = "ZscoreRobust", show_y_axis_labels = FALSE,show_sample_vlines = FALSE, supporting_reads_threshold = 50, sample_of_interest = NA, use_loggable_version = TRUE, seed = 1, pointsize = c(1, 2), ...){
   is_db = "tbl_sql" %in% class(kraken_report_df)
 
   # Defensive Assertions
@@ -123,6 +123,102 @@ kraken_report_visualise_signal_focus <- function(kraken_report_df, parent_taxids
   lapply(
     parent_taxids, kraken_calculate_proportion_of_signal_explained_by_n_strongest_taxids(kraken_report_df = as.data.frame(kraken_report_df), n = 1, parent_taxid)
     )
+
+  return(results)
+}
+
+#' Confidence Palette
+#'
+#' @return colours for confidence levels (character)
+#' @export
+#'
+#' @examples
+#' kraken_confidence_palette()
+kraken_confidence_palette  <- function(){
+  c(
+  'No Hit' = "#B3B3B3",
+  'Very Low' = '#E5C494',
+  'Low' =  '#FFD92F' ,
+  'Medium' = "#8DA0CB",
+  'High' = "#E78AC3"
+  )
+}
+
+#' Kraken Report Visualise Distributions
+#'
+#' @inheritParams kraken_report_add_zscore
+#' @param taxids_of_interest taxonomy ids to show as distinct facets (numeric)
+#' @param show_y_axis_labels show y axis labels? (boolean)
+#' @param show_sample_vlines show vertical lines indicating positions of samples of interest (boolean)
+#' @param sample_of_interest which samples are we most interested in - use show_sample_vlines flag to mark these samples (bool)
+#' @param ... other aesthetics passed to aes_string. Mostly used to show more properties in hoverbox once plots are made interactive
+#'
+#' @return ggplot
+#' @export
+#'
+kraken_report_visualise_distribution <- function(kraken_report_df, taxids_of_interest, show_y_axis_labels = FALSE,show_sample_vlines = FALSE, sample_of_interest = NA, ...){
+  is_db = "tbl_sql" %in% class(kraken_report_df)
+
+  columns = c("SampleID", "TaxonomyID", "ScientificName", "ReadsCoveredByClade", "RPM", "ZscoreRobustLoggable", "Confidence")
+  assertthat::assert_that(all(columns %in% colnames(kraken_report_df)), msg = paste0("kraken_report_df must contain the columns [", paste0(columns, collapse=", "), "]"))
+
+
+  # Subset the data
+  subset_df = kraken_report_df %>%
+    dplyr::filter(TaxonomyID %in% taxids_of_interest)
+
+  if(is_db)
+    subset_df = dplyr::collect(subset_df)
+
+
+  if(nrow(subset_df) == 0 )
+    stop('None of the taxids of interest are in the kraken data')
+
+  subset_df <- subset_df %>%
+    dplyr::mutate(
+      SampleOfInterest = SampleID %in% sample_of_interest
+    )
+
+  # Relevel factors so order of taxids_of_interest means something
+  scientific_names = subset_df$ScientificName[match(taxids_of_interest, subset_df$TaxonomyID)]
+
+  subset_df <- subset_df %>%
+    dplyr::mutate(ScientificName = forcats::fct_relevel(ScientificName, scientific_names))
+
+  plot = subset_df %>%
+    ggplot2::ggplot(ggplot2::aes(x = ZscoreRobustLoggable, y = as.double(ReadsCoveredByClade), colour = Confidence)) +
+    ggiraph::geom_point_interactive(shape = 21, size = 2, stroke = 1.5) +
+    ggplot2::facet_wrap(~ScientificName, ncol = 1, scales = "free_y") +
+    ggplot2::scale_x_continuous(trans = "log10", oob = scales::oob_squish_infinite) +
+    ggplot2::scale_y_continuous(trans = "log10", oob = scales::oob_squish_infinite, expand = ggplot2::expansion(c(0.1, 0.1))) +
+    ggplot2::theme_bw() +
+    ggplot2::ylab("Supporting Reads") +
+    ggplot2::xlab("Microbial Signal (Robust Zscore: loggable)") +
+    ggplot2::scale_color_manual(values = kraken_confidence_palette()) +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      strip.text = ggplot2::element_text(size = 20),
+      axis.title.x = ggplot2::element_text(size = 22, face = "bold"),
+      axis.title.y = ggplot2::element_text(size = 22, face = "bold")
+    )
+
+  if(!show_y_axis_labels){
+    plot = plot + ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.title.y  = ggplot2::element_blank())
+  }
+
+  if(show_sample_vlines){
+    plot = plot + ggplot2::geom_vline(data = function(df) {df[SampleID %in% sample_of_interest,]} ,ggplot2::aes_string(xintercept = metric, linetype = "SampleID"))
+  }
+
+  return(plot)
+}
+
+
+kraken_report_visualise_signal_focus <- function(kraken_report_df, parent_taxids){
+
+  lapply(
+    parent_taxids, kraken_calculate_proportion_of_signal_explained_by_n_strongest_taxids(kraken_report_df = as.data.frame(kraken_report_df), n = 1, parent_taxid)
+  )
 
   return(results)
 }
