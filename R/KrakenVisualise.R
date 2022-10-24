@@ -207,7 +207,7 @@ kraken_report_visualise_distribution <- function(kraken_report_df, taxids_of_int
   }
 
   if(show_sample_vlines){
-    plot = plot + ggplot2::geom_vline(data = function(df) {df[SampleID %in% sample_of_interest,]} ,ggplot2::aes_string(xintercept = metric, linetype = "SampleID"))
+    plot = plot + ggplot2::geom_vline(data = function(df) {df[SampleID %in% sample_of_interest,]} ,ggplot2::aes_string(xintercept = ZscoreRobustLoggable, linetype = "SampleID"))
   }
 
   return(plot)
