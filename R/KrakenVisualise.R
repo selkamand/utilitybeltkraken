@@ -156,7 +156,7 @@ kraken_confidence_palette  <- function(){
 #' @return ggplot
 #' @export
 #'
-kraken_report_visualise_distribution <- function(kraken_report_df, taxids_of_interest, show_y_axis_labels = FALSE,show_sample_vlines = FALSE, sample_of_interest = NA, ...){
+kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_interest, show_y_axis_labels = TRUE,show_sample_vlines = FALSE, sample_of_interest = NA, pointsize = 2, pointstroke = 1.5){
   is_db = "tbl_sql" %in% class(kraken_report_df)
 
   columns = c("SampleID", "TaxonomyID", "ScientificName", "ReadsCoveredByClade", "RPM", "ZscoreRobustLoggable", "Confidence")
@@ -187,7 +187,7 @@ kraken_report_visualise_distribution <- function(kraken_report_df, taxids_of_int
 
   plot = subset_df %>%
     ggplot2::ggplot(ggplot2::aes(x = ZscoreRobustLoggable, y = as.double(ReadsCoveredByClade), colour = Confidence)) +
-    ggiraph::geom_point_interactive(shape = 21, size = 2, stroke = 1.5) +
+    ggiraph::geom_point_interactive(shape = 21, size = pointsize, stroke = pointstroke) +
     ggplot2::facet_wrap(~ScientificName, ncol = 1, scales = "free_y") +
     ggplot2::scale_x_continuous(trans = "log10", oob = scales::oob_squish_infinite) +
     ggplot2::scale_y_continuous(trans = "log10", oob = scales::oob_squish_infinite, expand = ggplot2::expansion(c(0.1, 0.1))) +
