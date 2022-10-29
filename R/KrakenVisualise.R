@@ -185,15 +185,16 @@ kraken_report_visualise_distributions <- function(kraken_report_df, taxids_of_in
   subset_df <- subset_df %>%
     dplyr::mutate(ScientificName = forcats::fct_relevel(ScientificName, scientific_names))
 
+
   plot = subset_df %>%
-    ggplot2::ggplot(ggplot2::aes(x = ZscoreRobustLoggable, y = as.double(ReadsCoveredByClade), colour = Confidence)) +
+    ggplot2::ggplot(ggplot2::aes(x = ZscoreRobustLoggable, y = as.double(ReadsCoveredByClade), colour = Confidence, tooltip = SampleID)) +
     ggiraph::geom_point_interactive(shape = 21, size = pointsize, stroke = pointstroke) +
     ggplot2::facet_wrap(~ScientificName, ncol = 1, scales = "free_y") +
     ggplot2::scale_x_continuous(trans = "log10", oob = scales::oob_squish_infinite) +
     ggplot2::scale_y_continuous(trans = "log10", oob = scales::oob_squish_infinite, expand = ggplot2::expansion(c(0.1, 0.1))) +
     ggplot2::theme_bw() +
     ggplot2::ylab("Supporting Reads") +
-    ggplot2::xlab("Microbial Signal (Robust Zscore: loggable)") +
+    ggplot2::xlab("Microbial Signal\n(robust z-score, loggable)") +
     ggplot2::scale_color_manual(values = kraken_confidence_palette()) +
     ggplot2::theme(
       panel.grid.minor = ggplot2::element_blank(),

@@ -1,7 +1,6 @@
 
 
 # Kraken Taxanomic Operations ---------------------------------------------
-
 kraken_taxonomy_get_ancestors <- function(taxonomy_database, taxids, ranks){
   taxonomy_db_conn <- DBI::dbConnect(RSQLite::SQLite(), taxonomy_database)
 
@@ -12,7 +11,7 @@ kraken_taxonomy_get_ancestors <- function(taxonomy_database, taxids, ranks){
     dplyr::filter(TaxonomyID %in% taxids) |>
     dplyr::collect()
 
-  heirarchy_df |>
+  df <- heirarchy_df |>
     dplyr::group_by(TaxonomyID) |>
     dplyr::summarise(
       Lineage = paste0(ScientificNameAncestor, collapse = ">"),
@@ -20,7 +19,13 @@ kraken_taxonomy_get_ancestors <- function(taxonomy_database, taxids, ranks){
       ) |>
     dplyr::mutate(Lineage = paste0(Lineage, ">", ScientificName)) |>
     dplyr::select(-ScientificName)
+
+  DBI::dbDisconnect(taxonomy_db_conn)
+  return(df)
 }
+
+# Add a 'get all child taxids' function so we can more easily graph distributions of reads in specific clades
+
 
 ancestor_table_to_lineage <- function(df){
   #TODO: Inplement functionality
@@ -38,7 +43,7 @@ ancestor_table_to_lineage <- function(df){
 #' @examples
 #' inspect_file = system.file(package='utilitybeltkraken', "example_data/inspect_pluspf_20210517.txt")
 #' kraken_inspect_parse(inspect_file)
-kraken_inspect_parse <- function(file, dbname_taxonomy = paste0(getwd(),"/kraken_taxonomic_database.sqlite"), dbname_heirarchy = paste0(getwd(),"/kraken_taxonomic_heirarchy.sqlite")){
+kraken_inspect_parse_to_sqlite_db <- function(file, dbname_taxonomy = paste0(getwd(),"/kraken_taxonomic_database.sqlite"), dbname_heirarchy = paste0(getwd(),"/kraken_taxonomic_heirarchy.sqlite")){
   assertthat::assert_that(assertthat::is.string(file))
   assertthat::assert_that(file.exists(file))
 
